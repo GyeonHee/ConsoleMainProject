@@ -97,11 +97,6 @@ void Engine::Run()
 			Tick(deltaTime);
 			Render();
 
-			//// 제목에 FPS 출력
-			//char title[50] = {};
-			//sprintf_s(title, 50, "FPS: %f", (1.0f / deltaTime));
-			//SetConsoleTitleA(title);
-
 			// 시간 업데이트
 			previousTime = currentTime;
 
@@ -168,40 +163,15 @@ void Engine::BeginPlay()
 
 void Engine::Tick(float deltaTime)
 {
-	/*std::cout << "DeltaTime : " << deltaTime
-		<< ", FPS : " << (1.0f / deltaTime)
-		<<"\n";*/
-
-		// 레벨 업데이트
+	// 레벨 업데이트
 	if (mainLevel)
 	{
 		mainLevel->Tick(deltaTime);
 	}
-
-	/*if (GetKeyDown(VK_ESCAPE))
-	{
-		Quit();
-	}*/
-
-	/*if (GetKeyDown('A'))
-	{
-		std::cout << "KeyDown\n";
-	}
-	if (GetKey('A'))
-	{
-		std::cout << "Key\n";
-	}
-	if (GetKeyUp('A'))
-	{
-		std::cout << "KeyUp\n";
-	}*/
 }
 
 void Engine::Render()
 {
-	/*SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),
-		FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED
-	);*/
 	Utils::SetConsoleTextColor(FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED);
 
 	if (mainLevel)
@@ -210,6 +180,7 @@ void Engine::Render()
 	}
 }
 
+// Settings 폴더에서 EngineSetting.txt에 저장된 데이터 읽어오기
 void Engine::LoadEngineSettings()
 {
 	// 엔진 설정 파일 열기
@@ -224,7 +195,6 @@ void Engine::LoadEngineSettings()
 	}
 
 	// 로드
-
 	// FP(File Position) 포인터를 가장 뒤로 옮기기
 	fseek(file, 0, SEEK_END);
 

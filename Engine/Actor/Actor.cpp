@@ -5,6 +5,8 @@
 
 #include <Windows.h>
 #include <iostream>
+#include <sstream>
+#include <string>
 
 Actor::Actor(const char* image, Color color, const Vector2& position)
 	: color(color), position(position)
@@ -17,6 +19,7 @@ Actor::Actor(const char* image, Color color, const Vector2& position)
 
 	// 문자열 복사
 	strcpy_s(this->image, width + 1, image);
+
 }
 Actor::~Actor()
 {
@@ -71,7 +74,7 @@ void Actor::SetPosition(const Vector2& newPosition)
 	}
 
 	// 오른쪽 가장자리가 화면 오른쪽을 벗어났는지
-	if (newPosition.x + width - 1 > Engine::Get().Width())
+	if (newPosition.x + width -1 > Engine::Get().Width())
 	{
 		return;
 	}
