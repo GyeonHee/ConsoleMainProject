@@ -198,9 +198,6 @@ xcopy $(OutDir)\Engine.dll ..\Lib\Engine\ /y</Command>
     <ClCompile Include="Math\Vector2.cpp" />
     <ClCompile Include="Render\ScreenBuffer.cpp" />
   </ItemGroup>
-  <ItemGroup>
-    <Text Include="..\Settings\EngineSettings.txt" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

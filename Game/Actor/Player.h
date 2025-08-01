@@ -9,12 +9,15 @@ class Player : public Actor
 public:
 	Player();
 
+    virtual void BeginPlay() override;
 	virtual void Tick(float deltaTime) override;
 
-    void ChangeImage(const char* newimage);
+    void ChangeImage(const wchar_t* newimage);
     void Fire();
 private:
 	std::chrono::steady_clock::time_point lastKeyPressTime = std::chrono::steady_clock::now();
 	const double moveCooldownSec = 0.2f;  // ÄðÅ¸ÀÓ
     const double putBombCooldownSec = 0.2f;
+
+    class ICanPlayerMove* canPlayerMoveInterface = nullptr;
 };

@@ -1,6 +1,8 @@
 #include <iostream>
 #include <Windows.h>
 #include "Game/Game.h"
+//#include <io.h>
+//#include <fcntl.h>
 
 #define MAP_WIDTH 15
 #define MAP_HEIGHT 15
@@ -33,6 +35,8 @@ void SetConsoleEnvironment()
 
 int main()
 {
+   
+
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
     //SetConsoleEnvironment();
 

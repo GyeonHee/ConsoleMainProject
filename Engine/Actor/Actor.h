@@ -17,10 +17,14 @@ class Engine_API Actor : public RTTI
 	friend class Level;
 	RTTI_DECLARATIONS(Actor, RTTI)
 public:
-	Actor(const char* image = "",
+	/*Actor(const char* image = "",
 		Color color = Color::White,
 		const Vector2& position = Vector2::Zero
-	);
+	);*/
+    Actor(const wchar_t* image = L" ",
+        Color color = Color::White,
+        const Vector2& position = Vector2::Zero
+    );
 	virtual ~Actor();
 
 	// 이벤트 함수
@@ -64,8 +68,8 @@ protected:
 	Vector2 position;
 
 	// 그릴 값
-	//char image = ' ';
-	char* image = nullptr;
+	//char* image = nullptr;
+	wchar_t* image = nullptr;
 
 	// 문자열 길이
 	int width = 0;

@@ -14,7 +14,6 @@ public:
 	// conslle에 전달된 핸들을 사용해 콘솔 버퍼 생성.
 	ScreenBuffer(HANDLE console, const Vector2& screenSize);
 
-
 	// 소멸자.
 	~ScreenBuffer();
 

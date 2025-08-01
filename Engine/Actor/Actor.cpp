@@ -6,17 +6,30 @@
 #include <Windows.h>
 #include <iostream>
 
-Actor::Actor(const char* image, Color color, const Vector2& position)
-	: color(color), position(position)
+//Actor::Actor(const char* image, Color color, const Vector2& position)
+//	: color(color), position(position)
+//{
+//	// 문자열 길이
+//	width = (int)strlen(image);
+//
+//	// 메모리 할당
+//	this->image = new char[width + 1];
+//
+//	// 문자열 복사
+//	strcpy_s(this->image, width + 1, image);
+//    
+//}
+Actor::Actor(const wchar_t* image, Color color, const Vector2& position)
+    : color(color), position(position)
 {
-	// 문자열 길이
-	width = (int)strlen(image);
+    // 문자열 길이
+    width = (int)wcslen(image);
 
-	// 메모리 할당
-	this->image = new char[width + 1];
+    // 메모리 할당
+    this->image = new wchar_t[width + 1];
 
-	// 문자열 복사
-	strcpy_s(this->image, width + 1, image);
+    // 문자열 복사
+    wcscpy_s(this->image, width + 1, image);
 
 }
 Actor::~Actor()
@@ -58,6 +71,7 @@ void Actor::Render()
 	//std::cout << image;
 
 	// 엔진이 관리하는 이미지 버퍼에 액터의 문자열/색상 기록.
+	//Engine::Get().WriteToBuffer(position, image, color);
 	Engine::Get().WriteToBuffer(position, image, color);
 }
 

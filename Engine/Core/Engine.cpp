@@ -7,6 +7,8 @@
 #include <iostream>
 #include <Windows.h>
 #include <cstdlib> // for system()
+#include <io.h>
+#include <fcntl.h>
 
 // 2차원 배열을 컴퓨터가 1차원 배열로 계산하는 과정
 //(y * 4) + x
@@ -141,21 +143,40 @@ void Engine::Run()
 	Utils::SetConsoleTextColor(FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED);
 }
 
-void Engine::WriteToBuffer(const Vector2& position, const char* image, Color color)
+
+//void Engine::WriteToBuffer(const Vector2& position, const char* image, Color color)
+//{
+//	// 문자열 길이.
+//	//int length = static_cast<int>(strlen(image));
+//
+//	// 문자열 기록.
+//	for (int ix = 0; ix < length; ++ix)
+//	{
+//		// 기록할 문자 위치.
+//		int index = (position.y * (settings.width)) + position.x + ix;
+//
+//		// 버퍼에 문자/색상 기록.
+//		imageBuffer[index].Char.AsciiChar = image[ix];
+//		imageBuffer[index].Attributes = (WORD)color;
+//	}
+//}
+
+void Engine::WriteToBuffer(const Vector2& position, const wchar_t* image, Color color)
 {
-	// 문자열 길이.
-	int length = static_cast<int>(strlen(image));
+    // 문자열 길이.
+    //int length = static_cast<int>(strlen(image));
+    int length = static_cast<int>(wcslen(image));
 
-	// 문자열 기록.
-	for (int ix = 0; ix < length; ++ix)
-	{
-		// 기록할 문자 위치.
-		int index = (position.y * (settings.width)) + position.x + ix;
+    // 문자열 기록.
+    for (int ix = 0; ix < length; ++ix)
+    {
+        // 기록할 문자 위치.
+        int index = (position.y * (settings.width)) + position.x + ix;
 
-		// 버퍼에 문자/색상 기록.
-		imageBuffer[index].Char.AsciiChar = image[ix];
-		imageBuffer[index].Attributes = (WORD)color;
-	}
+        // 버퍼에 문자/색상 기록.
+        imageBuffer[index].Char.UnicodeChar = image[ix];
+        imageBuffer[index].Attributes = (WORD)color;
+    }
 }
 
 void Engine::PresentImmediately()
@@ -351,24 +372,27 @@ void Engine::ClearImageBuffer()
 		for (int x = 0; x < settings.width; ++x)
 		{
 			CHAR_INFO& buffer = imageBuffer[(y * (settings.width)) + x];
-			buffer.Char.AsciiChar = ' ';
+			buffer.Char.UnicodeChar = ' ';
 			buffer.Attributes = 0;
 		}
 
 		// 각 줄 끝에 개행 문자 추가.
 		CHAR_INFO& buffer = imageBuffer[(y * (settings.width)) + settings.width];
-		buffer.Char.AsciiChar = '\n';
+		buffer.Char.UnicodeChar = '\n';
 		buffer.Attributes = 0;
 	}
 
 	// 마지막에 널 문자 추가.
 	CHAR_INFO& buffer = imageBuffer[(settings.width) * settings.height + 1];
-	buffer.Char.AsciiChar = '\0';
+	buffer.Char.UnicodeChar = '\0';
 	buffer.Attributes = 0;
 }
 
 void Engine::ConsoleSizeSetting()
 {
+    SetConsoleOutputCP(65001);
+    _setmode(_fileno(stdout), _O_U8TEXT);
+
 	for (int i = 0; i < 2; ++i) {
 		HANDLE hOut = renderTargets[i]->GetHandle();
 
@@ -393,7 +417,7 @@ void Engine::ConsoleSizeSetting()
 		}
 
         // 3. 폰트 크기 설정(단위: 픽셀)
-        ConsoleFontSizeSetting(hOut, 15 * 2, 20 * 2);
+        ConsoleFontSizeSetting(hOut, 50, 50);
 
         if (i == 0) {
             // 3. 콘솔 창 중앙으로 이동

@@ -1,14 +1,19 @@
 #pragma once
 
 #include "Level/Level.h"
+#include "Interface/ICanPlayerMove.h"
 
-class GameLevel : public Level
+class GameLevel : public Level, public ICanPlayerMove
 {
 	RTTI_DECLARATIONS(GameLevel, Level)
 
 public:
 	GameLevel();
 	~GameLevel();
+
+    virtual bool CanPlayerMove(
+        const Vector2& playerPosition,
+        const Vector2& newPosition) override;
 
 	// 엔진 이벤트 함수
 	virtual void BeginPlay() override;

@@ -1,6 +1,6 @@
 #include "Bomb.h"
 
-Bomb::Bomb(const Vector2& position) : Actor("£À", Color::Red, position)
+Bomb::Bomb(const Vector2& position) : Actor(L"o", Color::Red, position)
 {
 }
 
