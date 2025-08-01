@@ -3,12 +3,13 @@
 #include "Engine.h"
 #include "Utils/Utils.h"
 #include "Level/Level.h"
+#include "Bomb.h"
 
-Player::Player() : Actor("■", Color::Green)
+Player::Player() : Actor("▼", Color::Green)
 {
 	// 시작 위치 (화면의 가운데, 가장 아래쪽)
 	int xPosition = 0; // Engine::Get().Width() / 2 - width / 2;
-	int yPosition = Engine::Get().Height() -1;
+    int yPosition = 0; // Engine::Get().Height() - 1;
 	SetPosition(Vector2(xPosition, yPosition));
 }
 
@@ -33,10 +34,9 @@ void Player::Tick(float deltaTime)
 	std::chrono::duration<double> elapsed = now - lastKeyPressTime;
 	if (Input::Get().GetKey(VK_LEFT))
 	{
-		//auto now = std::chrono::steady_clock::now();
-		//std::chrono::duration<double> elapsed = now - lastKeyPressTime;
-
-		if (elapsed.count() >= cooldownSec) {
+        ChangeImage("◀");
+		if (elapsed.count() >= moveCooldownSec) 
+        {
 			// 처리
 			Vector2 position = Position();
 			position.x -= 2;
@@ -47,10 +47,9 @@ void Player::Tick(float deltaTime)
 	}
 	if (Input::Get().GetKey(VK_RIGHT))
 	{
-		//auto now = std::chrono::steady_clock::now();
-		//std::chrono::duration<double> elapsed = now - lastKeyPressTime;
-
-		if (elapsed.count() >= cooldownSec) {
+        ChangeImage("▶");
+		if (elapsed.count() >= moveCooldownSec)
+        {
 			// 처리
 			Vector2 position = Position();
 			position.x += 2;
@@ -61,10 +60,9 @@ void Player::Tick(float deltaTime)
 	}
 	if (Input::Get().GetKey(VK_UP))
 	{
-		//auto now = std::chrono::steady_clock::now();
-		//std::chrono::duration<double> elapsed = now - lastKeyPressTime;
-
-		if (elapsed.count() >= cooldownSec) {
+        ChangeImage("▲");
+		if (elapsed.count() >= moveCooldownSec) 
+        {
 			// 처리
 			Vector2 position = Position();
 			position.y -= 1;
@@ -75,10 +73,9 @@ void Player::Tick(float deltaTime)
 	}
 	if (Input::Get().GetKey(VK_DOWN))
 	{
-		//auto now = std::chrono::steady_clock::now();
-		//std::chrono::duration<double> elapsed = now - lastKeyPressTime;
-
-		if (elapsed.count() >= cooldownSec) {
+        ChangeImage("▼");
+		if (elapsed.count() >= moveCooldownSec) 
+        {
 			// 처리
 			Vector2 position = Position();
 			position.y += 1;
@@ -87,4 +84,34 @@ void Player::Tick(float deltaTime)
 			lastKeyPressTime = now;
 		}
 	}
+
+    if (Input::Get().GetKey(VK_SPACE))
+    {
+        if (elapsed.count() >= putBombCooldownSec) 
+        {
+            Fire();
+
+            lastKeyPressTime = now;
+        }
+    }
+}
+
+void Player::ChangeImage(const char* newImage)
+{
+    // 기존 메모리 해제
+    delete[] image;
+
+    // 새 이미지 복사
+    width = (int)strlen(newImage);
+    image = new char[width + 1];
+    strcpy_s(image, width + 1, newImage);
+}
+
+void Player::Fire()
+{
+    // 플레이어 탄약 객체 생성.
+    // x: 플레이어의 가운데.
+    // y: 플레이어에 가운데
+    Vector2 bombPos(position.x, position.y);
+    owner->AddActor(new Bomb(bombPos));
 }

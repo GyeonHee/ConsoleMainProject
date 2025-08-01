@@ -5,7 +5,6 @@
 #include "RTTI.h"
 
 class Actor;
-
 class Engine_API Level : public RTTI
 {
 	RTTI_DECLARATIONS(Level, RTTI)

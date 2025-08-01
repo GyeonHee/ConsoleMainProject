@@ -394,6 +394,47 @@ void Engine::ConsoleSizeSetting()
 
         // 3. 폰트 크기 설정(단위: 픽셀)
         ConsoleFontSizeSetting(hOut, 15 * 2, 20 * 2);
+
+        if (i == 0) {
+            // 3. 콘솔 창 중앙으로 이동
+            HWND consoleWindow = GetConsoleWindow();
+            if (consoleWindow == nullptr) {
+                std::cerr << "콘솔 창 핸들을 가져올 수 없습니다.\n";
+                return;
+            }
+
+            // 현재 콘솔 폰트의 픽셀 크기 얻기
+            CONSOLE_FONT_INFO fontInfo;
+            if (!GetCurrentConsoleFont(hOut, FALSE, &fontInfo)) {
+                std::cerr << "콘솔 폰트 정보 가져오기 실패\n";
+                return;
+            }
+
+            COORD fontSize = GetConsoleFontSize(hOut, fontInfo.nFont); // 픽셀 단위
+
+            // 클라이언트 영역 크기 (콘솔 화면 기준)
+            int clientWidth = fontSize.X * settings.width;
+            int clientHeight = fontSize.Y * settings.height;
+
+            // 전체 윈도우 크기로 확장
+            RECT windowRect = { 0, 0, clientWidth, clientHeight };
+            if (!AdjustWindowRect(&windowRect, GetWindowLong(consoleWindow, GWL_STYLE), FALSE)) {
+                std::cerr << "AdjustWindowRect 실패\n";
+                return;
+            }
+
+            int totalWindowWidth = windowRect.right - windowRect.left;
+            int totalWindowHeight = windowRect.bottom - windowRect.top;
+
+            // 모니터 중앙 좌표 계산
+            int screenWidth = GetSystemMetrics(SM_CXSCREEN);
+            int screenHeight = GetSystemMetrics(SM_CYSCREEN);
+            int x = (screenWidth - totalWindowWidth) / 2;
+            int y = (screenHeight - totalWindowHeight) / 2;
+
+            // 콘솔 창 이동 및 크기 설정
+            MoveWindow(consoleWindow, x, y, totalWindowWidth, totalWindowHeight, TRUE);
+        }
 	}
 }
 

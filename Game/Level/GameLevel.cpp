@@ -30,18 +30,18 @@ void GameLevel::Render()
 
 void GameLevel::ReadMapFile(const char* fileName)
 {
-	// 최종 에셋 경로 완성
-	char filepath[256] = {};
-	sprintf_s(filepath, 256, "../Assets/%s", fileName);
+	//// 최종 에셋 경로 완성
+	//char filepath[256] = {};
+	//sprintf_s(filepath, 256, "../Assets/%s", fileName);
 
-	FILE* file = nullptr;
-	fopen_s(&file, filepath, "rt");
+	//FILE* file = nullptr;
+	//fopen_s(&file, filepath, "rt");
 
-	// 예외처리
-	if (nullptr == file)
-	{
+	//// 예외처리
+	//if (nullptr == file)
+	//{
 
-	}
+	//}
 }
 
 //void GameLevel::ReadMapFile(const char* fileName)
