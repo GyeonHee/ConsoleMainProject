@@ -1,12 +1,20 @@
-#include "Engine.h"
-#include <iostream>
-#include "Level/Level.h"
-#include <Windows.h>
-#include "Utils/Utils.h"
+ï»¿#include "Engine.h"
 #include "Input.h"
+#include "Level/Level.h"
+#include "Utils/Utils.h"
+#include "Render/ScreenBuffer.h"
 
+#include <iostream>
+#include <Windows.h>
+#include <cstdlib> // for system()
 
-// Á¤Àû º¯¼ö ÃÊ±âÈ­
+// 2ì°¨ì› ë°°ì—´ì„ ì»´í“¨í„°ê°€ 1ì°¨ì› ë°°ì—´ë¡œ ê³„ì‚°í•˜ëŠ” ê³¼ì •
+//(y * 4) + x
+// 4ëŠ” [y][x]ì—ì„œ [][4]ì¼ ê²½ìš° 
+// [][5]ë©´ (y * 5) + x
+// ex(arr[3][4]ì¼ ê²½ìš° [1][1]ì¸ë±ìŠ¤ì˜ ê°’ì€ arr[(1 * 4) + 1] ì´ë‹¤. == arr[5];
+
+// ì •ì  ë³€ìˆ˜ ì´ˆê¸°í™”
 Engine* Engine::instance = nullptr;
 
 BOOL WINAPI ConsoleMessageProcedure(DWORD CtrlType)
@@ -14,7 +22,7 @@ BOOL WINAPI ConsoleMessageProcedure(DWORD CtrlType)
 	switch (CtrlType)
 	{
 	case CTRL_CLOSE_EVENT:
-		// Engine ¸Ş¸ğ¸® ÇØÁ¦
+		// Engine ë©”ëª¨ë¦¬ í•´ì œ
 		Engine::Get().CleanUp();
 		return false;
 	}
@@ -26,20 +34,38 @@ Engine::Engine()
 {
 	instance = this;
 
-	// ÄÜ¼Ö Ä¿¼­ ²ô±â
+	// ì½˜ì†” ì»¤ì„œ ë„ê¸°
 	CONSOLE_CURSOR_INFO info;
 	info.bVisible = false;
 	info.dwSize = 1;
+
 	SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &info);
 
-	// ÄÜ¼Ö Ã¢ ÀÌº¥Æ® µî·Ï
-	SetConsoleCtrlHandler(ConsoleMessageProcedure, TRUE);
-
-	// ¿£Áø ¼³Á¤ ·Îµå
+	// ì—”ì§„ ì„¤ì • ë¡œë“œ
 	LoadEngineSettings();
 
-	// ·£´ı Á¾ÀÚ°ª(seed) ¼³Á¤
+	// ëœë¤ ì¢…ìê°’(seed) ì„¤ì •
 	srand(static_cast<unsigned int>(time(nullptr)));
+
+	// ì´ë¯¸ì§€ ë²„í¼ ìƒì„±.
+	Vector2 screenSize(settings.width, settings.height); // 30, 30
+	imageBuffer = new CHAR_INFO[(screenSize.x + 1) * screenSize.y + 1];
+
+	// ë²„í¼ ì´ˆê¸°í™” (ë¬¸ì ë²„í¼).
+	ClearImageBuffer();
+
+	// ë‘ ê°œì˜ ë²„í¼ ìƒì„±.
+	renderTargets[0] = new ScreenBuffer(GetStdHandle(STD_OUTPUT_HANDLE), screenSize);
+	renderTargets[1] = new ScreenBuffer(screenSize);
+
+	
+	// ë²„í¼ êµí™˜.
+	Present();
+
+	ConsoleSizeSetting();
+
+	// ì½˜ì†” ì°½ ì´ë²¤íŠ¸ ë“±ë¡
+	SetConsoleCtrlHandler(ConsoleMessageProcedure, TRUE);
 }
 
 Engine::~Engine()
@@ -49,7 +75,7 @@ Engine::~Engine()
 
 void Engine::Run()
 {
-	// ¹Ğ¸® ¼¼ÄÁµå ´ÜÀ§·Î ÇöÀç ½Ã°£À» ¾Ë·ÁÁÜ
+	// ë°€ë¦¬ ì„¸ì»¨ë“œ ë‹¨ìœ„ë¡œ í˜„ì¬ ì‹œê°„ì„ ì•Œë ¤ì¤Œ
 	//float currentTime = timeGetTime();
 
 	LARGE_INTEGER currentTime;
@@ -57,53 +83,53 @@ void Engine::Run()
 	QueryPerformanceCounter(&currentTime);
 	previousTime = currentTime;
 
-	// ÇÏµå¿ş¾î ½Ã°èÀÇ Á¤¹Ğµµ(ÁÖÆÄ¼ö) °¡Á®¿À±â.
-	// ³ªÁß¿¡ ÃÊ·Î º¯È¯ÇÏ±â À§ÇØ
+	// í•˜ë“œì›¨ì–´ ì‹œê³„ì˜ ì •ë°€ë„(ì£¼íŒŒìˆ˜) ê°€ì ¸ì˜¤ê¸°.
+	// ë‚˜ì¤‘ì— ì´ˆë¡œ ë³€í™˜í•˜ê¸° ìœ„í•´
 	LARGE_INTEGER frequency;
 	QueryPerformanceFrequency(&frequency);
 
-	// Å¸°Ù ÇÁ·¹ÀÓ
+	// íƒ€ê²Ÿ í”„ë ˆì„
 	float targetFrameRate = settings.framerate == 0.0f ? 60.0f : settings.framerate;
 
-	// Å¸°Ù ÇÑ ÇÁ·¹ÀÓ ½Ã°£
+	// íƒ€ê²Ÿ í•œ í”„ë ˆì„ ì‹œê°„
 	float oneFrameTime = 1.0f / targetFrameRate;
 
 	// GameLoop.
 	while (true)
 	{
-		// ¿£Áø Á¾·á ¿©ºÎ È®ÀÎ
+		// ì—”ì§„ ì¢…ë£Œ ì—¬ë¶€ í™•ì¸
 		if (isQuit)
 		{
-			// ·çÇÁ Á¾·á
+			// ë£¨í”„ ì¢…ë£Œ
 			break;
 		}
 
-		// ÇÁ·¹ÀÓ ½Ã°£ °è»ê
-		// (ÇöÀç ½Ã°£ - ÀÌÀü ½Ã°£) / ÁÖÆÄ¼ö = ÃÊ´ÜÀ§
+		// í”„ë ˆì„ ì‹œê°„ ê³„ì‚°
+		// (í˜„ì¬ ì‹œê°„ - ì´ì „ ì‹œê°„) / ì£¼íŒŒìˆ˜ = ì´ˆë‹¨ìœ„
 		QueryPerformanceCounter(&currentTime);
 
-		// ÇÁ·¹ÀÓ ½Ã°£
+		// í”„ë ˆì„ ì‹œê°„
 		float deltaTime =
 			(currentTime.QuadPart - previousTime.QuadPart)
 			/ (float)frequency.QuadPart;
 
-		// ÀÔ·ÂÀº ÃÖ´ëÇÑ »¡¸®
+		// ì…ë ¥ì€ ìµœëŒ€í•œ ë¹¨ë¦¬
 		input.ProcessInput();
 
-		// °íÁ¤ ÇÁ·¹ÀÓ
+		// ê³ ì • í”„ë ˆì„
 		if (deltaTime >= oneFrameTime)
 		{
 			BeginPlay();
 			Tick(deltaTime);
 			Render();
 
-			// ½Ã°£ ¾÷µ¥ÀÌÆ®
+			// ì‹œê°„ ì—…ë°ì´íŠ¸
 			previousTime = currentTime;
 
-			// ÇöÀç ÇÁ·¹ÀÓÀÇ ÀÔ·ÂÀ» ±â·Ï
+			// í˜„ì¬ í”„ë ˆì„ì˜ ì…ë ¥ì„ ê¸°ë¡
 			input.SavePreviousKeyStates();
 
-			// ÀÌÀü ÇÁ·¹ÀÓ¿¡ Ãß°¡ ¹× »èÁ¦ ¿äÃ»µÈ ¾×ÅÍ Ã³¸®
+			// ì´ì „ í”„ë ˆì„ì— ì¶”ê°€ ë° ì‚­ì œ ìš”ì²­ëœ ì•¡í„° ì²˜ë¦¬
 			if (mainLevel)
 			{
 				mainLevel->ProcessAddAndDestroyActors();
@@ -111,13 +137,36 @@ void Engine::Run()
 		}
 	}
 
-	// Á¤¸®(ÅØ½ºÆ® »ö»ó ¿ø·¡´ë·Î µ¹·Á³õ±â)
+	// ì •ë¦¬(í…ìŠ¤íŠ¸ ìƒ‰ìƒ ì›ë˜ëŒ€ë¡œ ëŒë ¤ë†“ê¸°)
 	Utils::SetConsoleTextColor(FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED);
+}
+
+void Engine::WriteToBuffer(const Vector2& position, const char* image, Color color)
+{
+	// ë¬¸ìì—´ ê¸¸ì´.
+	int length = static_cast<int>(strlen(image));
+
+	// ë¬¸ìì—´ ê¸°ë¡.
+	for (int ix = 0; ix < length; ++ix)
+	{
+		// ê¸°ë¡í•  ë¬¸ì ìœ„ì¹˜.
+		int index = (position.y * (settings.width)) + position.x + ix;
+
+		// ë²„í¼ì— ë¬¸ì/ìƒ‰ìƒ ê¸°ë¡.
+		imageBuffer[index].Char.AsciiChar = image[ix];
+		imageBuffer[index].Attributes = (WORD)color;
+	}
+}
+
+void Engine::PresentImmediately()
+{
+	GetRenderer()->Render(imageBuffer);
+	Present();
 }
 
 void Engine::AddLevel(Level* newLevel)
 {
-	// ±âÁ¸¿¡ ÀÖ´ø ·¹º§Àº Á¦°Å
+	// ê¸°ì¡´ì— ìˆë˜ ë ˆë²¨ì€ ì œê±°
 	if (mainLevel)
 	{
 		delete mainLevel;
@@ -128,13 +177,20 @@ void Engine::AddLevel(Level* newLevel)
 
 void Engine::CleanUp()
 {
-	// ·¹º§ »èÁ¦
+	// ë ˆë²¨ ì‚­ì œ
 	SafeDelete(mainLevel);
+
+	// ë¬¸ì ë²„í¼ ì‚­ì œ.
+	SafeDeleteArray(imageBuffer);
+
+	// ë Œë” íƒ€ê²Ÿ ì‚­ì œ.
+	SafeDelete(renderTargets[0]);
+	SafeDelete(renderTargets[1]);
 }
 
 void Engine::Quit()
 {
-	// Á¾·á ÇÃ·¡±× ¼³Á¤
+	// ì¢…ë£Œ í”Œë˜ê·¸ ì„¤ì •
 	isQuit = true;
 }
 
@@ -153,6 +209,10 @@ int Engine::Height() const
 	return settings.height;
 }
 
+void Engine::OnInitialized()
+{
+}
+
 void Engine::BeginPlay()
 {
 	if (mainLevel)
@@ -163,27 +223,55 @@ void Engine::BeginPlay()
 
 void Engine::Tick(float deltaTime)
 {
-	// ·¹º§ ¾÷µ¥ÀÌÆ®
+	// ë ˆë²¨ ì—…ë°ì´íŠ¸
 	if (mainLevel)
 	{
 		mainLevel->Tick(deltaTime);
 	}
 }
 
+void Engine::Clear()
+{
+	ClearImageBuffer();
+	GetRenderer()->Clear();
+}
+
 void Engine::Render()
 {
-	Utils::SetConsoleTextColor(FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED);
+	//Utils::SetConsoleTextColor(FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED);
 
+	// í™”ë©´ ì§€ìš°ê¸°.
+	Clear();
+
+	// ë ˆë²¨ ê·¸ë¦¬ê¸°
 	if (mainLevel)
 	{
 		mainLevel->Render();
 	}
+
+	// ë°±ë²„í¼ì— ë°ì´í„° ì“°ê¸°.
+	GetRenderer()->Render(imageBuffer);
+
+	// ë²„í¼ êµí™˜.
+	Present();
 }
 
-// Settings Æú´õ¿¡¼­ EngineSetting.txt¿¡ ÀúÀåµÈ µ¥ÀÌÅÍ ÀĞ¾î¿À±â
+// ì½˜ì†” ë²„í¼ êµí™˜ í›„ ì¶œë ¥
+void Engine::Present()
+{
+	// ë²„í¼ êµí™˜.
+	SetConsoleActiveScreenBuffer(GetRenderer()->buffer);
+
+	// ì¸ë±ìŠ¤ ë’¤ì§‘ê¸° ê³µì‹
+	// 1 - x
+	// ì¸ë±ìŠ¤ ë’¤ì§‘ê¸°. 1->0, 0->1.
+	currentRenderTargetIndex = 1 - currentRenderTargetIndex;
+}
+
+// Settings í´ë”ì—ì„œ EngineSetting.txtì— ì €ì¥ëœ ë°ì´í„° ì½ì–´ì˜¤ê¸°
 void Engine::LoadEngineSettings()
 {
-	// ¿£Áø ¼³Á¤ ÆÄÀÏ ¿­±â
+	// ì—”ì§„ ì„¤ì • íŒŒì¼ ì—´ê¸°
 	FILE* file = nullptr;
 	fopen_s(&file, "../Settings/EngineSettings.txt", "rt");
 
@@ -194,39 +282,39 @@ void Engine::LoadEngineSettings()
 		return;
 	}
 
-	// ·Îµå
-	// FP(File Position) Æ÷ÀÎÅÍ¸¦ °¡Àå µÚ·Î ¿Å±â±â
+	// ë¡œë“œ
+	// FP(File Position) í¬ì¸í„°ë¥¼ ê°€ì¥ ë’¤ë¡œ ì˜®ê¸°ê¸°
 	fseek(file, 0, SEEK_END);
 
-	// ÀÌ À§Ä¡ ±¸ÇÏ±â
+	// ì´ ìœ„ì¹˜ êµ¬í•˜ê¸°
 	size_t fileSize = ftell(file);
 
-	// ´Ù½Ã Ã¹ À§Ä¡·Î µÇµ¹¸®±â
+	// ë‹¤ì‹œ ì²« ìœ„ì¹˜ë¡œ ë˜ëŒë¦¬ê¸°
 	rewind(file);
 
-	// ÆÄÀÏ ³»¿ëÀ» ÀúÀåÇÒ ¹öÆÛ ÇÒ´ç
+	// íŒŒì¼ ë‚´ìš©ì„ ì €ì¥í•  ë²„í¼ í• ë‹¹
 	char* buffer = new char[fileSize + 1];
 	memset(buffer, 0, fileSize + 1);
 
-	// ³»¿ë ÀĞ±â
+	// ë‚´ìš© ì½ê¸°
 	size_t readSize = fread(buffer, sizeof(char), fileSize, file);
 
 	char* context = nullptr;
 	char* token = nullptr;
 
-	// ÆÄ½Ì(Parcing, ±¸¹® ÇØ¼® -> ÇÊ¿äÇÑ Á¤º¸¸¦ ¾ò´Â °úÁ¤)
+	// íŒŒì‹±(Parcing, êµ¬ë¬¸ í•´ì„ -> í•„ìš”í•œ ì •ë³´ë¥¼ ì–»ëŠ” ê³¼ì •)
 	token = strtok_s(buffer, "\n", &context);
 
-	// ±¸¹® ºĞ¼®
+	// êµ¬ë¬¸ ë¶„ì„
 	while (token != nullptr)
 	{
-		// Å°/°ª ºĞ¸®
+		// í‚¤/ê°’ ë¶„ë¦¬
 		char header[10] = {};
 
-		// ¾Æ·¡ ±¸¹®ÀÌ Á¦´ë·Î µ¿ÀÛÇÏ·Á¸é Å°¿Í °ª »çÀÌÀÇ ºóÄ­ÀÌ ÀÖ¾î¾ß ÇÔ
+		// ì•„ë˜ êµ¬ë¬¸ì´ ì œëŒ€ë¡œ ë™ì‘í•˜ë ¤ë©´ í‚¤ì™€ ê°’ ì‚¬ì´ì˜ ë¹ˆì¹¸ì´ ìˆì–´ì•¼ í•¨
 		sscanf_s(token, "%s", header, 10);
 
-		// Çì´õ ¹®ÀÚ¿­ ºñ±³
+		// í—¤ë” ë¬¸ìì—´ ë¹„êµ
 		if (strcmp(header, "framerate") == 0)
 		{
 			sscanf_s(token, "framerate = %f", &settings.framerate);
@@ -240,12 +328,86 @@ void Engine::LoadEngineSettings()
 			sscanf_s(token, "height = %d", &settings.height);
 		}
 
-		// ±× ´ÙÀ½ ÁÙ ºĞ¸®
+		// ê·¸ ë‹¤ìŒ ì¤„ ë¶„ë¦¬
 		token = strtok_s(nullptr, "\n", &context);
 	}
 
-	// ¹öÆÛ ÇØÁ¦
+	// ë²„í¼ í•´ì œ
 	SafeDeleteArray(buffer);
 
 	fclose(file);
+}
+
+ScreenBuffer* Engine::GetRenderer() const
+{
+	return renderTargets[currentRenderTargetIndex];
+}
+
+void Engine::ClearImageBuffer()
+{
+	// ê¸€ì ë²„í¼ ë®ì–´ì“°ê¸°.
+	for (int y = 0; y < settings.height; ++y)
+	{
+		for (int x = 0; x < settings.width; ++x)
+		{
+			CHAR_INFO& buffer = imageBuffer[(y * (settings.width)) + x];
+			buffer.Char.AsciiChar = ' ';
+			buffer.Attributes = 0;
+		}
+
+		// ê° ì¤„ ëì— ê°œí–‰ ë¬¸ì ì¶”ê°€.
+		CHAR_INFO& buffer = imageBuffer[(y * (settings.width)) + settings.width];
+		buffer.Char.AsciiChar = '\n';
+		buffer.Attributes = 0;
+	}
+
+	// ë§ˆì§€ë§‰ì— ë„ ë¬¸ì ì¶”ê°€.
+	CHAR_INFO& buffer = imageBuffer[(settings.width) * settings.height + 1];
+	buffer.Char.AsciiChar = '\0';
+	buffer.Attributes = 0;
+}
+
+void Engine::ConsoleSizeSetting()
+{
+	for (int i = 0; i < 2; ++i) {
+		HANDLE hOut = renderTargets[i]->GetHandle();
+
+        // ë¬´ì¡°ê±´ "ì°½ í¬ê¸° â‰¤ ë²„í¼ í¬ê¸°" ê·¸ë˜ì„œ ì„ì‹œë¡œ ì¤„ì—¬ë†“ìŒ
+        SMALL_RECT tempWindow = { 0, 0, 1, 1 };
+        SetConsoleWindowInfo(hOut, TRUE, &tempWindow);
+
+		// 1. ë²„í¼ í¬ê¸° ì„¤ì •
+		COORD bufferSize = { static_cast<SHORT>(settings.width), static_cast<SHORT>(settings.height) };
+		if (!SetConsoleScreenBufferSize(hOut, bufferSize))
+		{
+			std::cerr << "SetConsoleScreenBufferSize ì‹¤íŒ¨ buffer" << i << "\n";
+			continue;
+		}
+
+		// 2. ì½˜ì†” ì°½ í¬ê¸° ì„¤ì •
+		SMALL_RECT windowSize = { 0, 0, static_cast<SHORT>(settings.width - 1), static_cast<SHORT>(settings.height - 1) };
+		if (!SetConsoleWindowInfo(hOut, TRUE, &windowSize))
+		{
+			std::cerr << "SetConsoleWindowInfo ì‹¤íŒ¨\n";
+			return;
+		}
+
+        // 3. í°íŠ¸ í¬ê¸° ì„¤ì •(ë‹¨ìœ„: í”½ì…€)
+        ConsoleFontSizeSetting(hOut, 15 * 2, 20 * 2);
+	}
+}
+
+void Engine::ConsoleFontSizeSetting(HANDLE hConsole, int width, int height)
+{
+    CONSOLE_FONT_INFOEX fontInfo = { 0 };
+    fontInfo.cbSize = sizeof(fontInfo);
+    fontInfo.dwFontSize.X = width;   // ê¸€ì ë„ˆë¹„
+    fontInfo.dwFontSize.Y = height;  // ê¸€ì ë†’ì´
+    fontInfo.FontFamily = FF_DONTCARE;
+    fontInfo.FontWeight = FW_NORMAL;
+    wcscpy_s(fontInfo.FaceName, L"Consolas"); // ë˜ëŠ” L"Lucida Console"
+
+    if (!SetCurrentConsoleFontEx(hConsole, FALSE, &fontInfo)) {
+        std::cerr << "í°íŠ¸ ì„¤ì • ì‹¤íŒ¨\n";
+    }
 }

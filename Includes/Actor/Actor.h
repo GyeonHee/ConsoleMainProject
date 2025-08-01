@@ -12,7 +12,6 @@
 
 // 전방 선언
 class Level;
-
 class Engine_API Actor : public RTTI
 {
 	friend class Level;
@@ -51,6 +50,8 @@ public:
 	// 오너십 설정
 	void SetOwner(Level* newOwner);
 	Level* GetOwner();
+
+	bool TestIntersect(const Actor* const other);
 
 	// 객체 삭제 함수
 	void Destroy();

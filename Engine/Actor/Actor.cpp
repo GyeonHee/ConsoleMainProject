@@ -5,8 +5,6 @@
 
 #include <Windows.h>
 #include <iostream>
-#include <sstream>
-#include <string>
 
 Actor::Actor(const char* image, Color color, const Vector2& position)
 	: color(color), position(position)
@@ -51,13 +49,16 @@ void Actor::Render()
 	//static HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
 
 	// 커서 이동
-	Utils::SetCursorPosition(position);
+	//Utils::SetCursorPosition(position);
 
 	// 색상 설정
-	Utils::SetConsoleTextColor(color);
+	//Utils::SetConsoleTextColor(color);
 
 	//그리기
-	std::cout << image;
+	//std::cout << image;
+
+	// 엔진이 관리하는 이미지 버퍼에 액터의 문자열/색상 기록.
+	Engine::Get().WriteToBuffer(position, image, color);
 }
 
 void Actor::SetPosition(const Vector2& newPosition)
@@ -74,7 +75,7 @@ void Actor::SetPosition(const Vector2& newPosition)
 	}
 
 	// 오른쪽 가장자리가 화면 오른쪽을 벗어났는지
-	if (newPosition.x + width -1 > Engine::Get().Width())
+	if (newPosition.x + width > Engine::Get().Width())
 	{
 		return;
 	}
@@ -86,7 +87,7 @@ void Actor::SetPosition(const Vector2& newPosition)
 	}
 
 	// 화면 아래를 벗어났는지
-	if (newPosition.y - 1 > Engine::Get().Height())
+	if (newPosition.y + 1 > Engine::Get().Height())
 	{
 		return;
 	}
@@ -96,15 +97,15 @@ void Actor::SetPosition(const Vector2& newPosition)
 	{
 		return;
 	}
-	// 지울 위치 확인
-	Vector2 direction = newPosition - position;
-	position.x = direction.x >= 0 ? position.x : position.x + width - 1;
+	//// 지울 위치 확인
+	//Vector2 direction = newPosition - position;
+	//position.x = direction.x >= 0 ? position.x : position.x + width - 1;
 
-	// 커서 이동
-	Utils::SetCursorPosition(position);
+	//// 커서 이동
+	//Utils::SetCursorPosition(position);
 
-	// 문자열 길이 고려해서 지울 위치 확인해야 함
-	std::cout << ' ';
+	//// 문자열 길이 고려해서 지울 위치 확인해야 함
+	//std::cout << ' ';
 
 	position = newPosition;
 }
@@ -112,6 +113,11 @@ void Actor::SetPosition(const Vector2& newPosition)
 Vector2 Actor::Position() const
 {
 	return position;
+}
+
+int Actor::Width() const
+{
+	return width;
 }
 
 void Actor::SetSortingOrder(unsigned int sortingOrder)
@@ -127,6 +133,38 @@ void Actor::SetOwner(Level* newOwner)
 Level* Actor::GetOwner()
 {
 	return owner;
+}
+
+bool Actor::TestIntersect(const Actor* const other)
+{
+	// AABB(Axis Aligned Bounding Box).
+	// Note: 현재 액터 구조 상 세로는 크기가 없음(크기가 1).
+	//       따라서 가로의 최소/최대 위치만 더 고려하면 됨.
+
+	// 이 액터의 x 좌표 정보.
+	int xMin = position.x;
+	int xMax = position.x + width - 1;
+
+	// 충돌 비교할 다른 액터의 x 좌표 정보.
+	int otherXMin = other->position.x;
+	int otherXMax = other->position.x + other->width - 1;
+
+	// 안겹치는 조건 확인.
+
+	// 다른 액터의 왼쪽 좌표가 내 오른쪽 좌표보다 더 오른쪽에 있으면 안겹침.
+	if (otherXMin > xMax)
+	{
+		return false;
+	}
+
+	// 다른 액터의 오른쪽 좌표가 내 왼쪽 좌표보다 더 왼쪽에 있으면 안겹침.
+	if (otherXMax < xMin)
+	{
+		return false;
+	}
+
+	// y 좌표가 같은지 최종 확인.
+	return position.y == other->position.y;
 }
 
 void Actor::Destroy()

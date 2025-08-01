@@ -4,17 +4,21 @@
 #include "Utils/Utils.h"
 #include "Level/Level.h"
 
-Player::Player() : Actor("＠", Color::Green)
+Player::Player() : Actor("■", Color::Green)
 {
 	// 시작 위치 (화면의 가운데, 가장 아래쪽)
-	int xPosition = Engine::Get().Width() / 2 - width / 2;
-	int yPosition = Engine::Get().Height() - 1;
+	int xPosition = 0; // Engine::Get().Width() / 2 - width / 2;
+	int yPosition = Engine::Get().Height() -1;
 	SetPosition(Vector2(xPosition, yPosition));
 }
 
 void Player::Tick(float deltaTime)
 {
 	super::Tick(deltaTime);
+
+	char buffer[20] = {};
+	sprintf_s(buffer, 20, "pos: (%d, %d)", position.x, position.y);
+	SetConsoleTitleA(buffer);
 
 	// 입력 처리
 	if (Input::Get().GetKeyDown(VK_ESCAPE))

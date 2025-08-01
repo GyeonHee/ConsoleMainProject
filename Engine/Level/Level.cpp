@@ -2,7 +2,6 @@
 #include "Actor/Actor.h"
 #include "Utils/Utils.h"
 #include <iostream>
-#include <windows.h>
 
 Level::Level()
 {
@@ -15,6 +14,9 @@ Level::~Level()
 	{
 		SafeDelete(actor);
 	}
+
+	// std::vector 정리
+	actors.clear();
 }
 
 // 레벨에 액터를 추가할 때 사용
@@ -32,6 +34,17 @@ void Level::AddActor(Actor* newActor)
 
 void Level::DestroyActor(Actor* destroyedActor)
 {
+	// 중복 검사
+	if (destroyRequestedActors.size() > 0)
+	{
+		for (const Actor* const actor : destroyRequestedActors)
+		{
+			if (actor == destroyedActor)
+			{
+				return;
+			}
+		}
+	}
 	// 대기 배열에 추가
 	destroyRequestedActors.emplace_back(destroyedActor);
 }
@@ -142,16 +155,16 @@ void Level::ProcessAddAndDestroyActors()
 	}
 
 	// destroyedActors 배열을 순회하면서 액터 delete
-	for (auto* actor : destroyRequestedActors)
+	for (auto*& actor : destroyRequestedActors)
 	{
 		// 액터가 그렸던 곳 지우기
 		Utils::SetCursorPosition(actor->position);
 
-		// 콘솔에 빈문자 출력해서 지우기
-		for (int i = 0; i < actor->width; ++i)
-		{
-			std::cout << " ";
-		}
+		//// 콘솔에 빈문자 출력해서 지우기
+		//for (int i = 0; i < actor->width; ++i)
+		//{
+		//	std::cout << " ";
+		//}
 
 		// 리소스 해제
 		SafeDelete(actor);

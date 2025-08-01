@@ -1,6 +1,10 @@
 #pragma once
 #include "Core.h"
 #include "Input.h"
+
+#include "Math/Color.h"
+#include "Math/Vector2.h"
+
 #include <Windows.h>
 
 // 엔진 설정 구조체
@@ -17,6 +21,7 @@ struct EngineSettings
 };
 
 class Level;
+class ScreenBuffer;
 class Engine_API Engine
 {
 public:
@@ -25,6 +30,12 @@ public:
 
 	// 엔진 실행 함수
 	void Run();
+
+	// 문자열 그리기 요청 함수.
+	void WriteToBuffer(const Vector2& position, const char* image, Color color = Color::White);
+
+	// 버퍼를 곧바로 교환 요청할 때 사용하는 함수
+	void PresentImmediately();
 
 	// 레벨 추가 함수
 	void AddLevel(Level* newLevel);
@@ -42,13 +53,35 @@ public:
 	int Width() const;
 	int Height() const;
 
-private:
+protected:
+
+	// 엔진/게임 초기화 시 사용 (레벨 추가 등).
+	virtual void OnInitialized();
+
 	void BeginPlay();
 	void Tick(float deltaTime = 0.0f);
 	void Render();
 
+	// 화면 지우는 함수 (전체를 빈 문자열로 설정).
+	void Clear();
+
+	// 버퍼 교환 함수 (프론트 버퍼 <-> 백버퍼)
+	void Present();
+
 	// 엔진 설정 로드 함수
 	void LoadEngineSettings();
+
+	// 백버퍼 렌더 타겟 반환 함수.
+	ScreenBuffer* GetRenderer() const;
+
+	// 글자 버퍼 지우는 함수.
+	void ClearImageBuffer();
+
+	// 콘솔창 크기 세팅
+	void ConsoleSizeSetting();
+
+    // 콘솔창에 그릴 폰트 크기 세팅
+    void ConsoleFontSizeSetting(HANDLE hConsole, int width, int height);
 
 protected:
 	// 엔진 종료 플래그
@@ -62,6 +95,15 @@ protected:
 
 	// 엔진 설정
 	EngineSettings settings;
+
+	// 백버퍼(프레임).
+	CHAR_INFO* imageBuffer = nullptr;
+
+	// 이중 버퍼.
+	ScreenBuffer* renderTargets[2] = { };
+
+	// 백버퍼로 사용하는 렌더 타겟의 인덱스.
+	int currentRenderTargetIndex = 0;
 
 	// 싱글톤 변수
 	static Engine* instance;
