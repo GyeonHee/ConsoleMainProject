@@ -1,22 +1,26 @@
-#include "GameLevel.h"
+ï»¿#include "GameLevel.h"
 #include "Actor/Player.h"
 #include "Actor/Wall.h"
 #include "Actor/Ground.h"
+#include "Actor/Bomb.h"
+#include "Actor/Block.h"
+#include "Actor/Box.h"
+#include "Actor/Bush.h"
 
 GameLevel::GameLevel()
 {
+    // 0 : Ground, 1 : Wall, 2 : Block, 3 : Box, 4 : Bush 
     ReadMapFile("Map1.txt");
 
-	// ÇÃ·¹ÀÌ¾î Ãß°¡
-	Player* player = new Player();
-	playerWidth = player->Width();
-	AddActor(player);
+	//// í”Œë ˆì´ì–´ ì¶”ê°€
+	//Player* player = new Player();
+	//playerWidth = player->Width();
+	//AddActor(player);
 }
 
 GameLevel::~GameLevel()
 {
 }
-
 
 void GameLevel::BeginPlay()
 {
@@ -38,29 +42,34 @@ void GameLevel::Render()
     }*/
 }
 
+void GameLevel::DestroyActorsAt(const Vector2& position)
+{
+
+}
+
 void GameLevel::ReadMapFile(const char* fileName)
 {
-	// ÃÖÁ¾ ¿¡¼Â °æ·Î ¿Ï¼º
+	// ìµœì¢… ì—ì…‹ ê²½ë¡œ ì™„ì„±
 	char filepath[256] = {};
 	sprintf_s(filepath, 256, "../Assets/%s", fileName);
 
 	FILE* file = nullptr;
 	fopen_s(&file, filepath, "rt");
 
-	// ¿¹¿ÜÃ³¸®
+	// ì˜ˆì™¸ì²˜ë¦¬
 	if (file == nullptr)
 	{
-		//std::cout << "¸Ê ÆÄÀÏ ÀĞ±â ½ÇÆĞ: " << filename << "\n";
+		//std::cout << "ë§µ íŒŒì¼ ì½ê¸° ì‹¤íŒ¨: " << filename << "\n";
 		__debugbreak();
 		return;
 	}
 
-	// ÆÄ½Ì(Parcing, ÇØ¼®)
+	// íŒŒì‹±(Parcing, í•´ì„)
 	fseek(file, 0, SEEK_END);
 	size_t fileSize = ftell(file);
 	rewind(file);
 
-	// È®ÀÎÇÑ ÆÄÀÏ Å©±â¸¦ È°¿ëÇØ ¹öÆÛ ÇÒ´ç
+	// í™•ì¸í•œ íŒŒì¼ í¬ê¸°ë¥¼ í™œìš©í•´ ë²„í¼ í• ë‹¹
 	char* buffer = new char[fileSize + 1];
 	//buffer[fileSize] = '\0';
 	memset(buffer, 0, fileSize + 1);
@@ -71,154 +80,295 @@ void GameLevel::ReadMapFile(const char* fileName)
 		std::cout << "fileSize is not matched with readSize\n";
 	}*/
 
-	// ¹è¿­ ¼øÈ¸¸¦ À§ÇÑ ÀÎµ¦½º º¯¼ö
+	// ë°°ì—´ ìˆœíšŒë¥¼ ìœ„í•œ ì¸ë±ìŠ¤ ë³€ìˆ˜
 	int index = 0;
 
-	// ¹®ÀÚ¿­ ±æÀÌ °ª
+	// ë¬¸ìì—´ ê¸¸ì´ ê°’
 	int size = (int)readSize;
 
-	// x, y ÁÂÇ¥
+	// x, y ì¢Œí‘œ
 	Vector2 position;
 
-	// ¹®ÀÚ ¹è¿­ ¼øÈ¸
+	// ë¬¸ì ë°°ì—´ ìˆœíšŒ
 	while (index < size)
 	{
-		// ¸Ê ¹®ÀÚ È®ÀÎ
+		// ë§µ ë¬¸ì í™•ì¸
 		char mapCharacter = buffer[index];
 		index++;
 
-		// °³Çà ¹®ÀÚ Ã³¸®
+		// ê°œí–‰ ë¬¸ì ì²˜ë¦¬
 		if (mapCharacter == '\n')
 		{
-			// ´ÙÀ½ ÁÙ·Î ³Ñ±â¸é¼­, x ÁÂÇ¥ ÃÊ±âÈ­
+			// ë‹¤ìŒ ì¤„ë¡œ ë„˜ê¸°ë©´ì„œ, x ì¢Œí‘œ ì´ˆê¸°í™”
 			++position.y;
 			position.x = 0;
 
 			continue;
 		}
 
-		// °¢ ¹®ÀÚº°·Î Ã³¸®
+		// ê° ë¬¸ìë³„ë¡œ ì²˜ë¦¬
+         // 0 : Ground, 1 : Wall, 2 : Block, 3 : Box, 4 : Bush 
 		switch (mapCharacter)
 		{
+        case 's':
+            AddActor(new Player(position));
+            AddActor(new Ground(position));
+            break;
         case '0':
             AddActor(new Ground(position));
             break;
-
         case '1':
             AddActor(new Wall(position));
             break;
+        case '2':
+            AddActor(new Block(position));
+            AddActor(new Ground(position));
+            break;
+        case '3':
+            AddActor(new Box(position));
+            AddActor(new Ground(position));
+            break;
+        case '4':
+            AddActor(new Bush(position));
+            AddActor(new Ground(position));
+            break;
 		}
 
-		// x ÁÂÇ¥ Áõ°¡ Ã³¸®
+		// x ì¢Œí‘œ ì¦ê°€ ì²˜ë¦¬
 		++position.x;
 	}
 
-	// ¹öÆÛ ÇØÁ¦
+	// ë²„í¼ í•´ì œ
 	delete[] buffer;
 
-	// ÆÄÀÏ ´İ±â
+	// íŒŒì¼ ë‹«ê¸°
 	fclose(file);
 }
 
-bool GameLevel::CanPlayerMove(
-    const Vector2& playerPosition,
-    const Vector2& newPosition)
+// ê¸°ì¡´ì— ì¼ë˜ CanPlayerMoveí•¨ìˆ˜
+//bool GameLevel::CanPlayerMove(const Vector2& playerPosition, const Vector2& newPosition)
+//{
+//    // ë°•ìŠ¤ ì²˜ë¦¬
+//    std::vector<Box*> boxActors;
+//    for (Actor* const actor : actors)
+//    {
+//        Box* box = actor->As<Box>();
+//        if (box)
+//        {
+//            boxActors.emplace_back(box);
+//        }
+//    }
+//
+//    // ì´ë™í•˜ë ¤ëŠ” ìœ„ì¹˜ì— ë°•ìŠ¤ê°€ ìˆëŠ”ì§€ í™•ì¸
+//    Box* searchedBox = nullptr;
+//    for (Box* const boxActor : boxActors)
+//    {
+//        // í”Œë ˆì´ì–´ê°€ ì´ë™í•˜ë ¤ëŠ” ìœ„ì¹˜ì™€ ë°•ìŠ¤ì˜ ìœ„ì¹˜ê°€ ê°™ì€ì§€ ë¹„êµ
+//        if (boxActor->Position() == newPosition)
+//        {
+//            // ê°™ì€ ìœ„ì¹˜ì— ìˆëŠ” ë°•ìŠ¤ ì €ì¥ í›„ ë£¨í”„ ì¢…ë£Œ
+//            searchedBox = boxActor;
+//            break;
+//        }
+//    }
+//
+//    bool isBlocked = false;
+//    bool hasGround = false;
+//    // ì´ë™í•˜ë ¤ëŠ” ìœ„ì¹˜ì— ë°•ìŠ¤ê°€ ìˆëŠ” ê²½ìš° ì²˜ë¦¬
+//    if (searchedBox)
+//    {
+//        // #1: ë°•ìŠ¤ë¥¼ ì´ë™ì‹œí‚¤ë ¤ëŠ” ìœ„ì¹˜ì— ë‹¤ë¥¸ ë°•ìŠ¤ê°€ ë˜ ìˆëŠ”ì§€ í™•ì¸
+//        Vector2 direction = newPosition - playerPosition;
+//        Vector2 nextPosition = searchedBox->Position() + direction;
+//        
+//
+//        for (Box* const otherBox : boxActors)
+//        {
+//            if (otherBox == searchedBox)
+//            {
+//                continue;
+//            }
+//
+//            // ë°•ìŠ¤ë¥¼ ì´ë™ì‹œí‚¤ë ¤ëŠ” ìœ„ì¹˜ì— ë‹¤ë¥¸ ë°•ìŠ¤ê°€ ìˆëŠ”ì§€ í™•ì¸
+//            if (otherBox->Position() == nextPosition)
+//            {
+//                // í”Œë ˆì´ì–´ ì´ë™ ëª»í•¨
+//                return false;
+//            }
+//        }
+//
+//        // #2: ë°•ìŠ¤ë¥¼ ì´ë™ì‹œí‚¤ë ¤ëŠ” ìœ„ì¹˜ì— ë°•ìŠ¤ì œì™¸ ë‹¤ë¥¸ ì•¡í„°ê°€ ìˆëŠ”ì§€ í™•ì¸
+//        for (Actor* const actor : actors)
+//        {
+//            if (actor == searchedBox) continue;
+//
+//            if (actor->Position() == nextPosition)
+//            {
+//                 // ë²½, ë¸”ëŸ­, í­íƒ„ì´ ìˆëŠ”ì§€ í™•ì¸
+//                 if (actor->As<Wall>() || actor->As<Block>() || actor->As<Bomb>())
+//                 {
+//                     // ìˆìœ¼ë©´ trueí•˜ê³  íƒˆì¶œ
+//                     isBlocked = true;
+//                     break;
+//                 }
+//
+//                 if (actor->As<Ground>())
+//                 {
+//                     // ë•…ì´ë©´ hasGround true
+//                     hasGround = true;
+//                 }
+//            }
+//        }
+//
+//        // ë‹¤ë¥¸ ë¸”ëŸ­ë“¤ ì•„ë‹ˆê³  ì˜¤ë¡œì§€ ë•…ì´ë©´ ë°•ìŠ¤ ì´ë™
+//        if (!isBlocked && hasGround)
+//        {
+//            searchedBox->SetPosition(nextPosition);
+//            return true;
+//        }
+//
+//        // ì „ë¶€ ë‹¤ í•´ë‹¹ì´ ì•ˆë  ë•Œ(ë²„ê·¸ì„)
+//        return false;
+//    } // if (searchedBox)
+//
+//    // #3: í”Œë ˆì´ì–´ê°€ ì´ë™í•˜ë ¤ëŠ” ìœ„ì¹˜ì— ë°•ìŠ¤ê°€ ì—†ëŠ” ê²½ìš°
+//    for (Actor* const actor : actors)
+//    {
+//        if (actor->Position() == newPosition)
+//        {
+//            /*if (actor->As<Wall>() ||
+//                actor->As<Block>() ||
+//                actor->As<Bomb>())
+//            {
+//                return false;
+//            }*/
+//
+//            if (actor->As<Wall>() ||
+//                actor->As<Bomb>())
+//            {
+//                return false;
+//            }
+//        }
+//    }
+//
+//    return true;
+//}
+
+// í”Œë ˆì´ì–´ê°€ ì›€ì§ì¼ ìˆ˜ ìˆëŠ”ì§€ íŒë‹¨
+bool GameLevel::CanPlayerMove(const Vector2& playerPosition, const Vector2& newPosition)
 {
-    //// °ÔÀÓ Å¬¸®¾î ¿©ºÎ È®ÀÎ ¹× Á¾·á Ã³¸®.
-    //if (isGameClear)
-    //{
-    //    return false;
-    //}
+    Actor* searchedBox = nullptr;
 
-    //// ¹Ú½º Ã³¸®.
-    //std::vector<Box*> boxActors;
-    //for (Actor* const actor : actors)
-    //{
-    //    Box* box = actor->As<Box>();
-    //    if (box)
-    //    {
-    //        boxActors.emplace_back(box);
-    //    }
-    //}
-
-    //// ÀÌµ¿ÇÏ·Á´Â À§Ä¡¿¡ ¹Ú½º°¡ ÀÖ´ÂÁö È®ÀÎ.
-    //Box* searchedBox = nullptr;
-    //for (Box* const boxActor : boxActors)
-    //{
-    //    // ÇÃ·¹ÀÌ¾î°¡ ÀÌµ¿ÇÏ·Á´Â À§Ä¡¿Í ¹Ú½ºÀÇ À§Ä¡°¡ °°ÀºÁö ºñ±³.
-    //    if (boxActor->Position() == newPosition)
-    //    {
-    //        // °°Àº À§Ä¡¿¡ ÀÖ´Â ¹Ú½º ÀúÀå ÈÄ ·çÇÁ Á¾·á.
-    //        searchedBox = boxActor;
-    //        break;
-    //    }
-    //}
-
-    //// ÀÌµ¿ÇÏ·Á´Â À§Ä¡¿¡ ¹Ú½º°¡ ÀÖ´Â °æ¿ì Ã³¸®.
-    //if (searchedBox)
-    //{
-    //    // #1: ¹Ú½º¸¦ ÀÌµ¿½ÃÅ°·Á´Â À§Ä¡¿¡ ´Ù¸¥ ¹Ú½º°¡ ¶Ç ÀÖ´ÂÁö È®ÀÎ.
-    //    Vector2 direction = newPosition - playerPosition;
-    //    Vector2 nextPosition = searchedBox->Position() + direction;
-
-    //    for (Box* const otherBox : boxActors)
-    //    {
-    //        // °°Àº ¹Ú½º´Â °Ç³Ê¶Ù±â.
-    //        if (otherBox == searchedBox)
-    //        {
-    //            continue;
-    //        }
-
-    //        // ¹Ú½º¸¦ ÀÌµ¿½ÃÅ°·Á´Â À§Ä¡¿¡ ´Ù¸¥ ¹Ú½º°¡ ÀÖ´ÂÁö È®ÀÎ.
-    //        if (otherBox->Position() == nextPosition)
-    //        {
-    //            // ÇÃ·¹ÀÌ¾î ÀÌµ¿ ¸øÇÔ.
-    //            return false;
-    //        }
-    //    }
-
-    //    for (Actor* const actor : actors)
-    //    {
-    //        if (actor->Position() == nextPosition)
-    //        {
-    //            // #2: ¹Ú½º´Â ¾øÁö¸¸, º®ÀÌ ÀÖÁö ¾ÊÀºÁö È®ÀÎ.
-    //            if (actor->As<Wall>())
-    //            {
-    //                // ÇÃ·¹ÀÌ¾î ÀÌµ¿ ¸øÇÔ.
-    //                return false;
-    //            }
-
-    //            // #3: ÀÌµ¿ °¡´ÉÇÑ °æ¿ì(±×¶ó¿ìµå, Å¸°Ù)¿¡´Â ¹Ú½º ÀÌµ¿ Ã³¸®.
-    //            if (actor->As<Ground>() || actor->As<Target>())
-    //            {
-    //                // ¹Ú½º ÀÌµ¿ Ã³¸®.
-    //                searchedBox->SetPosition(nextPosition);
-
-    //                // °ÔÀÓ Å¬¸®¾î ¿©ºÎ È®ÀÎ.
-    //                isGameClear = CheckGameClear();
-
-    //                // ÇÃ·¹ÀÌ¾î ÀÌµ¿ °¡´É.
-    //                return true;
-    //            }
-    //        }
-    //    }
-    //}
-
-    // ÇÃ·¹ÀÌ¾î°¡ ÀÌµ¿ÇÏ·Á´Â À§Ä¡¿¡ ¹Ú½º°¡ ¾ø´Â °æ¿ì.
     for (Actor* const actor : actors)
     {
+        // ì´ë™í•  ìœ„ì¹˜ì— ì•¡í„°ê°€ ìˆì„ë•Œ
         if (actor->Position() == newPosition)
         {
-            // º®ÀÌ¸é ÀÌµ¿ ºÒ°¡.
-            if (actor->As<Wall>())
-            {
-                return false;
-            }
+            // ê·¸ ì•¡í„°ê°€ ë°•ìŠ¤ì´ë©´
+            if (actor->As<Box>())
+                // ì•¡í„°ì— ë°•ìŠ¤ ì €ì¥
+                searchedBox = actor;
 
-            // ±×¶ó¿îµå or Å¸°Ù.
-            return true;
+            // ê·¸ ì•¡í„°ê°€ ë²½ì´ê±°ë‚˜, ë¸”ëŸ­ì´ê±°ë‚˜, ë¬¼í’ì„ ì´ë©´
+            if (actor->As<Wall>() || actor->As<Block>() || actor->As<Bomb>())
+            //if (actor->As<Wall>() || actor->As<Bomb>()) // ë””ë²„ê¹…ìš©
+                return false;
         }
     }
-    // ???.
-    return false;
+
+    // ì•„ê¹Œ ì €ì¥í•´ë‘” ë°•ìŠ¤
+    if (searchedBox != nullptr)
+    {
+        Vector2 direction = newPosition - playerPosition;
+        Vector2 nextPosition = searchedBox->Position() + direction;
+
+        // ë§µ ë²”ìœ„ ë²—ì–´ë‚˜ë©´ ëª»ì›€ì§ì„
+        if (nextPosition.x < 0 || nextPosition.x >= 15 ||
+            nextPosition.y < 0 || nextPosition.y >= 13)
+        {
+            return false;
+        }
+
+        for (Actor* const actor : actors)
+        {
+            // ë‹¤ìŒ ì´ë™í•  ê³³ì´ ì–´ë–¤ ì•¡í„°ì˜ ì¢Œí‘œê°’ê³¼ ê°™ë‹¤ë©´
+            if (actor->Position() == nextPosition)
+            {
+                // ê·¸ê²Œ ë²½ì´ê±°ë‚˜ ë¸”ëŸ­,í­íƒ„, ë°•ìŠ¤ë¼ë©´
+                if (actor->As<Wall>() || actor->As<Block>() || actor->As<Bomb>() || actor->As<Box>())
+                //if (actor->As<Wall>() || actor->As<Bomb>() || actor->As<Box>()) // ë””ë²„ê¹…ìš©
+                    // ëª»ì›€ì§ì„
+                    return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+void GameLevel::TryPlayerMove(const Vector2& playerPosition, const Vector2& newPosition)
+{
+    Vector2 direction = newPosition - playerPosition;
+
+    for (Actor* const actor : actors)
+    {
+        if (actor->Position() == newPosition && actor->As<Box>())
+        {
+            Vector2 boxNextPosition = newPosition + direction;
+            actor->SetPosition(boxNextPosition);
+            break;
+        }
+    }
+}
+
+void GameLevel::Explode(const Vector2& center)
+{
+    const Vector2 directions[4] = {
+       Vector2(1, 0), Vector2(-1, 0),
+       Vector2(0, 1), Vector2(0, -1)
+    };
+
+    const int range = 3;
+
+    for (const Vector2& dir : directions)
+    {
+        for (int i = 1; i <= range; ++i)
+        {
+            Vector2 target = center + dir * i;
+
+            if (!IsInMapBounds(target))
+                break;
+
+            Actor* actor = FindActorAt(target);
+            if (actor)
+            {
+                if (actor->As<Wall>())
+                    break;
+                else if (actor->As<Block>())
+                {   
+                    DestroyActor(actor);
+                    break;
+                }
+            }
+
+            // ì—¬ê¸°ì„œ ì´í™íŠ¸ ìƒì„± ê°€ëŠ¥ (ì˜ˆ: í­ë°œ ì• ë‹ˆë©”ì´ì…˜ ë“±)
+        }
+    }
+
+    // í­íƒ„ ì¤‘ì‹¬ ì²˜ë¦¬ (ì¤‘ì•™ ì´í™íŠ¸ ë“±)
+}
+
+bool GameLevel::IsInMapBounds(const Vector2& pos) const
+{
+    return pos.x >= 0 && pos.x < 15 && pos.y >= 0 && pos.y < 13;
+}
+
+Actor* GameLevel::FindActorAt(const Vector2& pos) const
+{
+    for (Actor* actor : actors)
+    {
+        if (actor->Position() == pos)
+            return actor;
+    }
+    return nullptr;
 }

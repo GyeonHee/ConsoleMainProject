@@ -3,6 +3,7 @@
 #include "Actor/Actor.h"
 #include <chrono>
 
+class IBombExplosion;
 class Bomb : public Actor
 {
     RTTI_DECLARATIONS(Bomb, Actor)
@@ -11,9 +12,12 @@ public:
     ~Bomb();
 
     virtual void Tick(float deltaTime) override;
+    void Explode();
+    void SetBombExplosionInterface(IBombExplosion* explosionInterface);
 
-    //void ChangeImage(const char* newimage);
 private:
     std::chrono::steady_clock::time_point lastKeyPressTime = std::chrono::steady_clock::now();
-    const double bombCooldownSec = 1.5f;  // 2.5ÃÊ ÄðÅ¸ÀÓ
+    const double bombCooldownSec = 2.0f;  // 2.5ÃÊ ÄðÅ¸ÀÓ
+
+    class IBombExplosion* bombExplosionInterface = nullptr;
 };

@@ -7,7 +7,7 @@ class Player : public Actor
 {
 	RTTI_DECLARATIONS(Player, Actor)
 public:
-	Player();
+    Player(const Vector2& position);
 
     virtual void BeginPlay() override;
 	virtual void Tick(float deltaTime) override;
@@ -20,4 +20,5 @@ private:
     const double putBombCooldownSec = 0.2f;
 
     class ICanPlayerMove* canPlayerMoveInterface = nullptr;
+
 };

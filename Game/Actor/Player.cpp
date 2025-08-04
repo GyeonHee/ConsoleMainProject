@@ -7,15 +7,9 @@
 
 #include "Interface/ICanPlayerMove.h"
 
-Player::Player() : Actor(L"o", Color::Green)
+Player::Player(const Vector2& position) : Actor(L"↓", Color::Green, position)
 {
-	// 시작 위치 (화면의 가운데, 가장 아래쪽)
-	int xPosition = 0; // Engine::Get().Width() / 2 - width / 2;
-    int yPosition = 0; // Engine::Get().Height() - 1;
-	SetPosition(Vector2(xPosition, yPosition));
-
-    // 그릴 때 사용할 정렬 순서 설정.
-    SetSortingOrder(1);
+    SetSortingOrder(3);
 }
 
 void Player::BeginPlay()
@@ -59,13 +53,14 @@ void Player::Tick(float deltaTime)
         // 이동 전에 이동 가능한지 확인
         if (canPlayerMoveInterface->CanPlayerMove(Position(), Vector2(Position().x - 1, Position().y)))
         {
-            //ChangeImage(L"◁");
-            ChangeImage(L"o");
+            ChangeImage(L"←");
+            //ChangeImage(L"o");
             if (elapsed.count() >= moveCooldownSec)
             {
                 // 처리
                 Vector2 position = Position();
                 position.x -= 1;
+                canPlayerMoveInterface->TryPlayerMove(Position(), position);
                 SetPosition(position);
 
                 lastKeyPressTime = now;
@@ -76,13 +71,14 @@ void Player::Tick(float deltaTime)
 	{
         if (canPlayerMoveInterface->CanPlayerMove(Position(), Vector2(Position().x + 1, Position().y)))
         {
-            //ChangeImage(L"▷");
-            ChangeImage(L"o");
+            ChangeImage(L"→");
+            //ChangeImage(L"o");
             if (elapsed.count() >= moveCooldownSec)
             {
                 // 처리
                 Vector2 position = Position();
                 position.x += 1;
+                canPlayerMoveInterface->TryPlayerMove(Position(),position);
                 SetPosition(position);
 
                 lastKeyPressTime = now;
@@ -93,13 +89,14 @@ void Player::Tick(float deltaTime)
 	{
         if (canPlayerMoveInterface->CanPlayerMove(Position(), Vector2(Position().x, Position().y - 1)))
         {
-            //ChangeImage(L"△");
-            ChangeImage(L"o");
+            ChangeImage(L"↑");
+            //ChangeImage(L"o");
             if (elapsed.count() >= moveCooldownSec)
             {
                 // 처리
                 Vector2 position = Position();
                 position.y -= 1;
+                canPlayerMoveInterface->TryPlayerMove(Position(), position);
                 SetPosition(position);
 
                 lastKeyPressTime = now;
@@ -110,13 +107,14 @@ void Player::Tick(float deltaTime)
 	{
         if (canPlayerMoveInterface->CanPlayerMove(Position(), Vector2(Position().x, Position().y + 1)))
         {
-            //ChangeImage(L"▽");
-            ChangeImage(L"o");
+            ChangeImage(L"↓");
+            //ChangeImage(L"o");
             if (elapsed.count() >= moveCooldownSec)
             {
                 // 처리
                 Vector2 position = Position();
                 position.y += 1;
+                canPlayerMoveInterface->TryPlayerMove(Position(), position);
                 SetPosition(position);
 
                 lastKeyPressTime = now;
@@ -155,6 +153,6 @@ void Player::Fire()
     // 플레이어 탄약 객체 생성.
     // x: 플레이어의 가운데.
     // y: 플레이어에 가운데
-    Vector2 bombPos(position.x, position.y);
-    owner->AddActor(new Bomb(bombPos));
+     Vector2 bombPos(position.x, position.y);
+    owner->AddActor(new Bomb(bombPos)); 
 }

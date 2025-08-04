@@ -27,6 +27,16 @@ Vector2 Vector2::operator+(const Vector2& other) const
     return Vector2(x + other.x, y + other.y);
 }
 
+Vector2 Vector2::operator*(const Vector2& other) const
+{
+    return Vector2(x * other.x, y * other.y);
+}
+
+Vector2 Vector2::operator*(const int other) const
+{
+    return Vector2(x * other, y * other);
+}
+
 Vector2 Vector2::operator-(const Vector2& other) const
 {
     return Vector2(x - other.x, y - other.y);

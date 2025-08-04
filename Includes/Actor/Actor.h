@@ -67,7 +67,7 @@ protected:
 	// 개체의 위치
 	Vector2 position;
 
-	// 그릴 값
+	// 그릴 값 (유니코드 문자를 쓰기 위해 wide character 타입으로 변수 선언)
 	//char* image = nullptr;
 	wchar_t* image = nullptr;
 

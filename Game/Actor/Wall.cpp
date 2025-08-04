@@ -1,7 +1,7 @@
-#include "Wall.h"
+ï»¿#include "Wall.h"
 
-Wall::Wall(const Vector2& position) : Actor(L"x", Color::Red, position)
+Wall::Wall(const Vector2& position) : Actor(L"âŒ‚", Color::Yellow, position)
 {
-    // ±×¸± ¶§ »ç¿ëÇÒ Á¤·Ä ¼ø¼­ ¼³Á¤.
+    // ê·¸ë¦´ ë•Œ ì‚¬ìš©í•  ì •ë ¬ ìˆœì„œ ì„¤ì •.
     SetSortingOrder(0);
 }

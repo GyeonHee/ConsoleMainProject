@@ -163,7 +163,10 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Actor\Block.cpp" />
     <ClCompile Include="Actor\Bomb.cpp" />
+    <ClCompile Include="Actor\Box.cpp" />
+    <ClCompile Include="Actor\Bush.cpp" />
     <ClCompile Include="Actor\Ground.cpp" />
     <ClCompile Include="Actor\Player.cpp" />
     <ClCompile Include="Actor\Wall.cpp" />
@@ -172,11 +175,15 @@
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Actor\Block.h" />
     <ClInclude Include="Actor\Bomb.h" />
+    <ClInclude Include="Actor\Box.h" />
+    <ClInclude Include="Actor\Bush.h" />
     <ClInclude Include="Actor\Ground.h" />
     <ClInclude Include="Actor\Player.h" />
     <ClInclude Include="Actor\Wall.h" />
     <ClInclude Include="Game\Game.h" />
+    <ClInclude Include="Interface\IBombExplosion.h" />
     <ClInclude Include="Interface\ICanPlayerMove.h" />
     <ClInclude Include="Level\GameLevel.h" />
   </ItemGroup>
