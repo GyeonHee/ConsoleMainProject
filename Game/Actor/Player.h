@@ -14,11 +14,18 @@ public:
 
     void ChangeImage(const wchar_t* newimage);
     void Fire();
+    
+    void PlayerHitBomb();
+    bool ShouldBeRemoved() const;
+
+
 private:
 	std::chrono::steady_clock::time_point lastKeyPressTime = std::chrono::steady_clock::now();
 	const double moveCooldownSec = 0.2f;  // ÄðÅ¸ÀÓ
     const double putBombCooldownSec = 0.2f;
 
-    class ICanPlayerMove* canPlayerMoveInterface = nullptr;
+    bool isHit = false;
+    float timeSinceHit = 0.0f;
 
+    class ICanPlayerMove* canPlayerMoveInterface = nullptr;
 };

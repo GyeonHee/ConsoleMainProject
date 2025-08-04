@@ -170,12 +170,24 @@ void Engine::WriteToBuffer(const Vector2& position, const wchar_t* image, Color 
     // 문자열 기록.
     for (int ix = 0; ix < length; ++ix)
     {
+        int x = position.x + ix;
+        int y = position.y;
+
+        // 버퍼 범위를 초과하지 않도록 체크
+        if (x < 0 || x >= settings.width || y < 0 || y >= settings.height)
+            continue;
+
         // 기록할 문자 위치.
         int index = (position.y * (settings.width)) + position.x + ix;
+        //              배경                      |              전경
+        WORD attr = static_cast<WORD>(color) << 4 | static_cast<WORD>(Color::Black);
+       
 
         // 버퍼에 문자/색상 기록.
         imageBuffer[index].Char.UnicodeChar = image[ix];
-        imageBuffer[index].Attributes = (WORD)color;
+        //imageBuffer[index].Attributes = (WORD)color;
+        imageBuffer[index].Attributes = attr;
+        
     }
 }
 

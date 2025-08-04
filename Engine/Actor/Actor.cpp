@@ -129,6 +129,7 @@ Vector2 Actor::Position() const
 	return position;
 }
 
+
 int Actor::Width() const
 {
 	return width;
@@ -192,4 +193,9 @@ void Actor::Destroy()
 void Actor::QuitGame()
 {
 	Engine::Get().Quit();
+}
+
+void Actor::SetColor(Color newColor)
+{
+    color = newColor;
 }

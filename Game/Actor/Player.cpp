@@ -33,6 +33,13 @@ void Player::Tick(float deltaTime)
 {
 	super::Tick(deltaTime);
 
+    // playerhitbomb
+    if (isHit)
+    {
+        timeSinceHit += deltaTime;
+        return;
+    }
+
 	char buffer[20] = {};
 	sprintf_s(buffer, 20, "pos: (%d, %d)", position.x, position.y);
 	SetConsoleTitleA(buffer);
@@ -124,13 +131,18 @@ void Player::Tick(float deltaTime)
 
     if (Input::Get().GetKey(VK_SPACE))
     {
-        if (elapsed.count() >= putBombCooldownSec) 
+        if (elapsed.count() >= putBombCooldownSec)
         {
             Fire();
 
             lastKeyPressTime = now;
         }
     }
+}
+
+bool Player::ShouldBeRemoved() const
+{
+    return isHit && timeSinceHit >= 5.0f;
 }
 
 void Player::ChangeImage(const wchar_t* newImage)
@@ -155,4 +167,13 @@ void Player::Fire()
     // y: 플레이어에 가운데
      Vector2 bombPos(position.x, position.y);
     owner->AddActor(new Bomb(bombPos)); 
+}
+
+void Player::PlayerHitBomb()
+{
+    if (isHit) return;
+
+    isHit = true;
+    timeSinceHit = 0.0f;
+    Actor::SetColor(Color::Blue); // 피격 시 색상
 }

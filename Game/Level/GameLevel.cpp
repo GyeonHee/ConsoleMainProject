@@ -7,15 +7,13 @@
 #include "Actor/Box.h"
 #include "Actor/Bush.h"
 
+GameLevel* GameLevel::instance = nullptr;
+
 GameLevel::GameLevel()
 {
+    instance = this;
     // 0 : Ground, 1 : Wall, 2 : Block, 3 : Box, 4 : Bush 
     ReadMapFile("Map1.txt");
-
-	//// 플레이어 추가
-	//Player* player = new Player();
-	//playerWidth = player->Width();
-	//AddActor(player);
 }
 
 GameLevel::~GameLevel()
@@ -30,21 +28,32 @@ void GameLevel::BeginPlay()
 void GameLevel::Tick(float deltaTime)
 {
 	super::Tick(deltaTime);
+
+    // 플레이어가 물풍선에 맞았을 때, 5초 후에 삭제
+    std::vector<Actor*> toRemove;
+
+    for (Actor* actor : actors)
+    {
+        actor->Tick(deltaTime);
+
+        if (Player* player = actor->As<Player>())
+        {
+            if (player->ShouldBeRemoved())
+            {
+                toRemove.push_back(player);
+            }
+        }
+    }
+
+    for (Actor* actor : toRemove)
+    {
+        RemoveActor(actor);       
+    }
 }
 
 void GameLevel::Render()
 {
 	super::Render();
-
-    /*for (int i = 0; i < 14; ++i)
-    {
-        snprintf(map[i], sizeof(map[i]), "%c, %c", i + 1, i + 1);
-    }*/
-}
-
-void GameLevel::DestroyActorsAt(const Vector2& position)
-{
-
 }
 
 void GameLevel::ReadMapFile(const char* fileName)
@@ -146,6 +155,7 @@ void GameLevel::ReadMapFile(const char* fileName)
 }
 
 // 기존에 썼던 CanPlayerMove함수
+
 //bool GameLevel::CanPlayerMove(const Vector2& playerPosition, const Vector2& newPosition)
 //{
 //    // 박스 처리
@@ -306,6 +316,7 @@ bool GameLevel::CanPlayerMove(const Vector2& playerPosition, const Vector2& newP
     return true;
 }
 
+// 움직일 수 있으면 움직이게 좌표값 정해줌
 void GameLevel::TryPlayerMove(const Vector2& playerPosition, const Vector2& newPosition)
 {
     Vector2 direction = newPosition - playerPosition;
@@ -321,54 +332,75 @@ void GameLevel::TryPlayerMove(const Vector2& playerPosition, const Vector2& newP
     }
 }
 
-void GameLevel::Explode(const Vector2& center)
+GameLevel& GameLevel::Get()
 {
-    const Vector2 directions[4] = {
-       Vector2(1, 0), Vector2(-1, 0),
-       Vector2(0, 1), Vector2(0, -1)
+    return *instance;
+}
+
+void GameLevel::HandleBombExplosion(const Vector2& center)
+{
+    const Vector2 directions[] = {
+       {0, 0}, {1, 0}, {-1, 0}, {0, 1}, {0, -1}
     };
 
-    const int range = 3;
-
+    std::vector<Actor*> toDestroy; // 삭제할 액터 저장
+    
     for (const Vector2& dir : directions)
     {
-        for (int i = 1; i <= range; ++i)
+        Vector2 target = center + dir;
+        if (!IsInMapBounds(target)) continue;
+
+        std::vector<Actor*> actorsAt = FindActorsAt(target);
+
+        for (Actor* actor : actorsAt)
         {
-            Vector2 target = center + dir * i;
+            if (actor->As <Wall>()) continue;
 
-            if (!IsInMapBounds(target))
-                break;
-
-            Actor* actor = FindActorAt(target);
-            if (actor)
+            if (actor->As<Block>() || actor->As<Box>() || actor->As<Bomb>() || actor->As<Bush>())
             {
-                if (actor->As<Wall>())
-                    break;
-                else if (actor->As<Block>())
-                {   
-                    DestroyActor(actor);
-                    break;
-                }
+                toDestroy.push_back(actor); // 먼저 저장
+                
             }
 
-            // 여기서 이펙트 생성 가능 (예: 폭발 애니메이션 등)
+            if (actor->As<Player>())
+            {
+                actor->As<Player>()->PlayerHitBomb();
+            }
         }
     }
 
-    // 폭탄 중심 처리 (중앙 이펙트 등)
+    for (Actor* actor : toDestroy)
+    {
+        RemoveActor(actor); // 나중에 제거
+    }
 }
 
-bool GameLevel::IsInMapBounds(const Vector2& pos) const
+std::vector<Actor*> GameLevel::FindActorsAt(const Vector2& pos)
 {
-    return pos.x >= 0 && pos.x < 15 && pos.y >= 0 && pos.y < 13;
-}
+    std::vector<Actor*> result;
 
-Actor* GameLevel::FindActorAt(const Vector2& pos) const
-{
     for (Actor* actor : actors)
     {
         if (actor->Position() == pos)
-            return actor;
+            result.push_back(actor);
     }
-    return nullptr;
+
+    return result;
+}
+
+bool GameLevel::IsInMapBounds(const Vector2& pos)
+{
+    return (pos.x >= 0 && pos.x < 15 &&
+        pos.y >= 0 && pos.y < 13);
+}
+
+void GameLevel::RemoveActor(Actor* actor)
+{
+    auto it = std::find(actors.begin(), actors.end(), actor);
+    
+    if (it != actors.end())
+    {
+        delete* it;           // 메모리 해제
+        actors.erase(it);     // 벡터에서 제거
+    }
 }
