@@ -27,8 +27,6 @@ public:
     bool IsInMapBounds(const Vector2& pos);
     void RemoveActor(Actor* actor);
 
-    // 플레이어 인스턴스 가져오기
-    //inline Player* GetPlayer() const { return player; } 
 private:
 	// 맵 파일을 읽어서 게임 객체 생성하는 함수
 	void ReadMapFile(const char* fileName);

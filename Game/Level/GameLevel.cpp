@@ -11,6 +11,7 @@ GameLevel* GameLevel::instance = nullptr;
 
 Player::KeyMap player1Keys = { 'W', 'S', 'A', 'D', VK_LSHIFT };
 Player::KeyMap player2Keys = { VK_UP, VK_DOWN, VK_LEFT, VK_RIGHT, VK_RSHIFT };
+
 GameLevel::GameLevel()
 {
     instance = this;
@@ -31,27 +32,6 @@ void GameLevel::BeginPlay()
 void GameLevel::Tick(float deltaTime)
 {
 	super::Tick(deltaTime);
-
-    // 플레이어가 물풍선에 맞았을 때, 5초 후에 삭제
-    std::vector<Actor*> toRemove;
-
-    for (Actor* actor : actors)
-    {
-        actor->Tick(deltaTime);
-
-        if (Player* player = actor->As<Player>())
-        {
-            if (player->ShouldBeRemoved())
-            {
-                toRemove.push_back(player);
-            }
-        }
-    }
-
-    for (Actor* actor : toRemove)
-    {
-        RemoveActor(actor);       
-    }
 }
 
 void GameLevel::Render()
@@ -365,8 +345,7 @@ void GameLevel::HandleBombExplosion(const Vector2& center)
 
             if (actor->As<Block>() || actor->As<Box>() || actor->As<Bomb>() || actor->As<Bush>())
             {
-                toDestroy.push_back(actor); // 먼저 저장
-                
+				actor->Destroy();
             }
 
             if (actor->As<Player>())
@@ -374,11 +353,6 @@ void GameLevel::HandleBombExplosion(const Vector2& center)
                 actor->As<Player>()->PlayerHitBomb();
             }
         }
-    }
-
-    for (Actor* actor : toDestroy)
-    {
-        RemoveActor(actor); // 나중에 제거
     }
 }
 

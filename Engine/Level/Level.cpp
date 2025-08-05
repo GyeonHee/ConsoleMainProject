@@ -12,7 +12,7 @@ Level::~Level()
 	// null 확인 후 액터 제거
 	for (Actor* actor : actors)
 	{
-		SafeDeleteArray(actor);
+		SafeDelete(actor);
 	}
 
 	// std::vector 정리
@@ -28,8 +28,6 @@ void Level::AddActor(Actor* newActor)
 
 	// 대기 배열에 추가
 	addRequestedActors.emplace_back(newActor);
-
-	//newActor->SetOwner(this);
 }
 
 void Level::DestroyActor(Actor* destroyedActor)
@@ -159,12 +157,6 @@ void Level::ProcessAddAndDestroyActors()
 	{
 		// 액터가 그렸던 곳 지우기
 		Utils::SetCursorPosition(actor->position);
-
-		//// 콘솔에 빈문자 출력해서 지우기
-		//for (int i = 0; i < actor->width; ++i)
-		//{
-		//	std::cout << " ";
-		//}
 
 		// 리소스 해제
 		SafeDelete(actor);

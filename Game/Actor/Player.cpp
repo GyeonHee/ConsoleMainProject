@@ -4,6 +4,7 @@
 #include "Utils/Utils.h"
 #include "Level/Level.h"
 #include "Bomb.h"
+#include "Game/Game.h"
 
 #include "Interface/ICanPlayerMove.h"
 
@@ -34,10 +35,16 @@ void Player::Tick(float deltaTime)
 {
 	super::Tick(deltaTime);
 
-    // playerhitbomb
+    // 피격시 isHit True가 되며 deltaTime이 흘러감
     if (isHit)
     {
         timeSinceHit += deltaTime;
+
+        if (ShouldBeRemoved())
+        {
+            Destroy();
+        }
+
         return;
     }
 
@@ -45,8 +52,13 @@ void Player::Tick(float deltaTime)
 	sprintf_s(buffer, 20, "pos: (%d, %d)", position.x, position.y);
 	SetConsoleTitleA(buffer);
 
-	// 입력 처리
 	
+    // 입력 처리
+    if (Input::Get().GetKeyDown(VK_ESCAPE))
+    {
+        Engine::Get().Quit();
+    }
+
 	// 방향키 입력
 	auto now = std::chrono::steady_clock::now();
 	std::chrono::duration<double> elapsed = now - lastKeyPressTime;
@@ -57,7 +69,6 @@ void Player::Tick(float deltaTime)
         if (canPlayerMoveInterface->CanPlayerMove(Position(), Vector2(Position().x - 1, Position().y)))
         {
             ChangeImage(L"←");
-            //ChangeImage(L"o");
             if (elapsed.count() >= moveCooldownSec)
             {
                 // 처리
@@ -76,7 +87,6 @@ void Player::Tick(float deltaTime)
         if (canPlayerMoveInterface->CanPlayerMove(Position(), Vector2(Position().x + 1, Position().y)))
         {
             ChangeImage(L"→");
-            //ChangeImage(L"o");
             if (elapsed.count() >= moveCooldownSec)
             {
                 // 처리
@@ -95,7 +105,6 @@ void Player::Tick(float deltaTime)
         if (canPlayerMoveInterface->CanPlayerMove(Position(), Vector2(Position().x, Position().y - 1)))
         {
             ChangeImage(L"↑");
-            //ChangeImage(L"o");
             if (elapsed.count() >= moveCooldownSec)
             {
                 // 처리
@@ -114,7 +123,6 @@ void Player::Tick(float deltaTime)
         if (canPlayerMoveInterface->CanPlayerMove(Position(), Vector2(Position().x, Position().y + 1)))
         {
             ChangeImage(L"↓");
-            //ChangeImage(L"o");
             if (elapsed.count() >= moveCooldownSec)
             {
                 // 처리
@@ -140,6 +148,7 @@ void Player::Tick(float deltaTime)
     }
 }
 
+// 폭탄에 피격 했을시 5초가 지나면 Destroy
 bool Player::ShouldBeRemoved() const
 {
     return isHit && timeSinceHit >= 5.0f;

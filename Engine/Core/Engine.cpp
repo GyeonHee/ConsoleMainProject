@@ -103,7 +103,6 @@ void Engine::Run()
 		// 엔진 종료 여부 확인
 		if (isQuit)
 		{
-            SafeDeleteArray(instance);
 			// 루프 종료
 			break;
 		}
@@ -145,7 +144,8 @@ void Engine::Run()
 	Utils::SetConsoleTextColor(FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED);
 }
 
-//void Engine::WriteToBuffer(const Vector2& position, const wchar_t* image, Color color) // 기존
+// 기존 WriteToBuffer
+//void Engine::WriteToBuffer(const Vector2& position, const wchar_t* image, Color color)
 //{
 //    // 문자열 길이.
 //    //int length = static_cast<int>(strlen(image));
@@ -285,8 +285,6 @@ void Engine::Clear()
 
 void Engine::Render()
 {
-	//Utils::SetConsoleTextColor(FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED);
-
 	// 화면 지우기.
 	Clear();
 

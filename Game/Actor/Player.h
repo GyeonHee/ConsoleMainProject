@@ -13,6 +13,10 @@ public:
         int moveLeft;
         int moveRight;
         int shift;
+
+        KeyMap(int up, int down, int left, int right, int shiftKey)
+            : moveUp(up), moveDown(down), moveLeft(left), moveRight(right), shift(shiftKey) {
+        }
     };
 
 	RTTI_DECLARATIONS(Player, Actor)

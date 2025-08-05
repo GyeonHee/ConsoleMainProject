@@ -22,7 +22,6 @@ void Bomb::Tick(float deltaTime)
     if (elapsed.count() >= bombCooldownSec)
     {
         Explode();
-        //Destroy();
     }
 }
 

@@ -7,6 +7,7 @@
 #include <iostream>
 
 // 아스키코드
+
 //Actor::Actor(const char* image, Color color, const Vector2& position)
 //	: color(color), position(position)
 //{
@@ -22,6 +23,7 @@
 //} 
 
 // 유니코드(기존)
+
 //Actor::Actor(const wchar_t* image, Color color, const Vector2& position)
 //    : color(color), position(position)
 //{
@@ -36,7 +38,7 @@
 //
 //}
 
-//배경 전경 나눔
+// 배경 전경 나눔(유니코드)
 Actor::Actor(const wchar_t* image, Color bgColor, Color fgColor, const Vector2& position)
     : bgColor(bgColor), fgColor(fgColor), position(position)
 {
@@ -73,23 +75,6 @@ void Actor::Tick(float deltaTime)
 // 그리기 함수
 void Actor::Render()
 {
-	// Win32 API
-	// 커서 위치 이동
-
-	// 콘솔 출력을 제어하는 핸들 얻어오기
-	//static HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
-
-	// 커서 이동
-	//Utils::SetCursorPosition(position);
-
-	// 색상 설정
-	//Utils::SetConsoleTextColor(color);
-
-	//그리기
-	//std::cout << image;
-
-	// 엔진이 관리하는 이미지 버퍼에 액터의 문자열/색상 기록.
-	//Engine::Get().WriteToBuffer(position, image, color); // 기존
 	Engine::Get().WriteToBuffer(position, image, bgColor, fgColor);
 }
 
@@ -129,15 +114,6 @@ void Actor::SetPosition(const Vector2& newPosition)
 	{
 		return;
 	}
-	//// 지울 위치 확인
-	//Vector2 direction = newPosition - position;
-	//position.x = direction.x >= 0 ? position.x : position.x + width - 1;
-
-	//// 커서 이동
-	//Utils::SetCursorPosition(position);
-
-	//// 문자열 길이 고려해서 지울 위치 확인해야 함
-	//std::cout << ' ';
 
 	position = newPosition;
 }
