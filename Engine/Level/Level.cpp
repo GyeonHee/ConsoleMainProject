@@ -12,7 +12,7 @@ Level::~Level()
 	// null 확인 후 액터 제거
 	for (Actor* actor : actors)
 	{
-		SafeDelete(actor);
+		SafeDeleteArray(actor);
 	}
 
 	// std::vector 정리

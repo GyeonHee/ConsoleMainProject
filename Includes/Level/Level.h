@@ -10,7 +10,7 @@ class Engine_API Level : public RTTI
 	RTTI_DECLARATIONS(Level, RTTI)
 public:
 	Level();
-	virtual ~Level();
+    virtual ~Level();
 
 	// 레벨에 액터를 추가할 때 사용
 	void AddActor(Actor* newActor);

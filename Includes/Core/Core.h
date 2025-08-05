@@ -26,7 +26,7 @@
 template<typename T>
 void SafeDelete(T*& target)
 {
-	if (target)
+	if (target != nullptr)
 	{
 		delete target;
 		target = nullptr;
@@ -37,7 +37,7 @@ void SafeDelete(T*& target)
 template<typename T>
 void SafeDeleteArray(T*& target)
 {
-	if (target)
+	if (target != nullptr)
 	{
 		delete[] target;
 		target = nullptr;

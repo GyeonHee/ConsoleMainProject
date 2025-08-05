@@ -32,8 +32,8 @@ public:
 	void Run();
 
 	// 문자열 그리기 요청 함수.
-	//void WriteToBuffer(const Vector2& position, const char* image, Color color = Color::White);
-	void WriteToBuffer(const Vector2& position, const wchar_t* image, Color color = Color::White);
+	//void WriteToBuffer(const Vector2& position, const wchar_t* image, Color color = Color::White); // 기존
+	void WriteToBuffer(const Vector2& position, const wchar_t* image, Color bgColor = Color::White, Color fgColor = Color::White);
 
 	// 버퍼를 곧바로 교환 요청할 때 사용하는 함수
 	void PresentImmediately();

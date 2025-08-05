@@ -3,6 +3,7 @@
 #include "Level/Level.h"
 #include "Utils/Utils.h"
 #include "Render/ScreenBuffer.h"
+#include "Core.h"
 
 #include <iostream>
 #include <Windows.h>
@@ -102,6 +103,7 @@ void Engine::Run()
 		// 엔진 종료 여부 확인
 		if (isQuit)
 		{
+            SafeDeleteArray(instance);
 			// 루프 종료
 			break;
 		}
@@ -143,28 +145,40 @@ void Engine::Run()
 	Utils::SetConsoleTextColor(FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED);
 }
 
-
-//void Engine::WriteToBuffer(const Vector2& position, const char* image, Color color)
+//void Engine::WriteToBuffer(const Vector2& position, const wchar_t* image, Color color) // 기존
 //{
-//	// 문자열 길이.
-//	//int length = static_cast<int>(strlen(image));
+//    // 문자열 길이.
+//    //int length = static_cast<int>(strlen(image));
+//    int length = static_cast<int>(wcslen(image));
 //
-//	// 문자열 기록.
-//	for (int ix = 0; ix < length; ++ix)
-//	{
-//		// 기록할 문자 위치.
-//		int index = (position.y * (settings.width)) + position.x + ix;
+//    // 문자열 기록.
+//    for (int ix = 0; ix < length; ++ix)
+//    {
+//        int x = position.x + ix;
+//        int y = position.y;
 //
-//		// 버퍼에 문자/색상 기록.
-//		imageBuffer[index].Char.AsciiChar = image[ix];
-//		imageBuffer[index].Attributes = (WORD)color;
-//	}
+//        // 버퍼 범위를 초과하지 않도록 체크
+//        if (x < 0 || x >= settings.width || y < 0 || y >= settings.height)
+//            continue;
+//
+//        // 기록할 문자 위치.
+//        int index = (position.y * (settings.width)) + position.x + ix;
+//        //              배경                      |              전경
+//        WORD attr = static_cast<WORD>(Color::White) << 4 | static_cast<WORD>(color);
+//       
+//
+//        // 버퍼에 문자/색상 기록.
+//        imageBuffer[index].Char.UnicodeChar = image[ix];
+//        //imageBuffer[index].Attributes = (WORD)color;
+//        imageBuffer[index].Attributes = attr;
+//        
+//    }
 //}
 
-void Engine::WriteToBuffer(const Vector2& position, const wchar_t* image, Color color)
+void Engine::WriteToBuffer(const Vector2& position, const wchar_t* image, Color bgColor, Color fgColor)
 {
     // 문자열 길이.
-    //int length = static_cast<int>(strlen(image));
+   //int length = static_cast<int>(strlen(image));
     int length = static_cast<int>(wcslen(image));
 
     // 문자열 기록.
@@ -180,14 +194,14 @@ void Engine::WriteToBuffer(const Vector2& position, const wchar_t* image, Color 
         // 기록할 문자 위치.
         int index = (position.y * (settings.width)) + position.x + ix;
         //              배경                      |              전경
-        WORD attr = static_cast<WORD>(color) << 4 | static_cast<WORD>(Color::Black);
-       
+        WORD attr = static_cast<WORD>(bgColor) << 4 | static_cast<WORD>(fgColor);
+
 
         // 버퍼에 문자/색상 기록.
         imageBuffer[index].Char.UnicodeChar = image[ix];
         //imageBuffer[index].Attributes = (WORD)color;
         imageBuffer[index].Attributes = attr;
-        
+
     }
 }
 

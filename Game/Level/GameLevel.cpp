@@ -9,6 +9,8 @@
 
 GameLevel* GameLevel::instance = nullptr;
 
+Player::KeyMap player1Keys = { 'W', 'S', 'A', 'D', VK_LSHIFT };
+Player::KeyMap player2Keys = { VK_UP, VK_DOWN, VK_LEFT, VK_RIGHT, VK_RSHIFT };
 GameLevel::GameLevel()
 {
     instance = this;
@@ -18,6 +20,7 @@ GameLevel::GameLevel()
 
 GameLevel::~GameLevel()
 {
+    
 }
 
 void GameLevel::BeginPlay()
@@ -119,8 +122,12 @@ void GameLevel::ReadMapFile(const char* fileName)
          // 0 : Ground, 1 : Wall, 2 : Block, 3 : Box, 4 : Bush 
 		switch (mapCharacter)
 		{
-        case 's':
-            AddActor(new Player(position));
+        case 'a':
+            AddActor(new Player(position, player1Keys, Color::Red));
+            AddActor(new Ground(position));
+            break;
+        case 'b':
+            AddActor(new Player(position, player2Keys, Color::Green));
             AddActor(new Ground(position));
             break;
         case '0':

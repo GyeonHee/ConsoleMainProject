@@ -6,6 +6,7 @@
 #include <Windows.h>
 #include <iostream>
 
+// 아스키코드
 //Actor::Actor(const char* image, Color color, const Vector2& position)
 //	: color(color), position(position)
 //{
@@ -18,9 +19,26 @@
 //	// 문자열 복사
 //	strcpy_s(this->image, width + 1, image);
 //    
+//} 
+
+// 유니코드(기존)
+//Actor::Actor(const wchar_t* image, Color color, const Vector2& position)
+//    : color(color), position(position)
+//{
+//    //// 문자열 길이
+//    width = (int)wcslen(image);
+//
+//    //// 메모리 할당
+//    this->image = new wchar_t[width + 1];
+//
+//    //// 문자열 복사
+//    wcscpy_s(this->image, width + 1, image);
+//
 //}
-Actor::Actor(const wchar_t* image, Color color, const Vector2& position)
-    : color(color), position(position)
+
+//배경 전경 나눔
+Actor::Actor(const wchar_t* image, Color bgColor, Color fgColor, const Vector2& position)
+    : bgColor(bgColor), fgColor(fgColor), position(position)
 {
     // 문자열 길이
     width = (int)wcslen(image);
@@ -28,10 +46,10 @@ Actor::Actor(const wchar_t* image, Color color, const Vector2& position)
     // 메모리 할당
     this->image = new wchar_t[width + 1];
 
-    // 문자열 복사
+    //문자열 복사
     wcscpy_s(this->image, width + 1, image);
-
 }
+
 Actor::~Actor()
 {
 	// 메모리 해제
@@ -71,8 +89,8 @@ void Actor::Render()
 	//std::cout << image;
 
 	// 엔진이 관리하는 이미지 버퍼에 액터의 문자열/색상 기록.
-	//Engine::Get().WriteToBuffer(position, image, color);
-	Engine::Get().WriteToBuffer(position, image, color);
+	//Engine::Get().WriteToBuffer(position, image, color); // 기존
+	Engine::Get().WriteToBuffer(position, image, bgColor, fgColor);
 }
 
 void Actor::SetPosition(const Vector2& newPosition)
@@ -195,7 +213,7 @@ void Actor::QuitGame()
 	Engine::Get().Quit();
 }
 
-void Actor::SetColor(Color newColor)
+void Actor::SetColor(Color newBgColor)
 {
-    color = newColor;
+    bgColor = newBgColor;
 }

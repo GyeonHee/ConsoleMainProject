@@ -7,7 +7,8 @@
 
 #include "Interface/ICanPlayerMove.h"
 
-Player::Player(const Vector2& position) : Actor(L"↓", Color::Green, position)
+
+Player::Player(const Vector2& position, const KeyMap& keys, Color color) : Actor(L"↓", Color::White, color,  position) ,keyMap(keys)
 {
     SetSortingOrder(3);
 }
@@ -45,17 +46,12 @@ void Player::Tick(float deltaTime)
 	SetConsoleTitleA(buffer);
 
 	// 입력 처리
-	if (Input::Get().GetKeyDown(VK_ESCAPE))
-	{
-		// 게임 종료
-		QuitGame();
-		return;
-	}
-
+	
 	// 방향키 입력
 	auto now = std::chrono::steady_clock::now();
 	std::chrono::duration<double> elapsed = now - lastKeyPressTime;
-	if (Input::Get().GetKey(VK_LEFT))
+	//if (Input::Get().GetKey(VK_LEFT))
+    if(GetAsyncKeyState(keyMap.moveLeft) & 0x8000)
 	{
         // 이동 전에 이동 가능한지 확인
         if (canPlayerMoveInterface->CanPlayerMove(Position(), Vector2(Position().x - 1, Position().y)))
@@ -74,7 +70,8 @@ void Player::Tick(float deltaTime)
             }
         }
 	}
-	if (Input::Get().GetKey(VK_RIGHT))
+	//if (Input::Get().GetKey(VK_RIGHT))
+    if(GetAsyncKeyState(keyMap.moveRight) & 0x8000)
 	{
         if (canPlayerMoveInterface->CanPlayerMove(Position(), Vector2(Position().x + 1, Position().y)))
         {
@@ -92,7 +89,8 @@ void Player::Tick(float deltaTime)
             }
         }
 	}
-	if (Input::Get().GetKey(VK_UP))
+	//if (Input::Get().GetKey(VK_UP))
+    if(GetAsyncKeyState(keyMap.moveUp) & 0x8000)
 	{
         if (canPlayerMoveInterface->CanPlayerMove(Position(), Vector2(Position().x, Position().y - 1)))
         {
@@ -110,7 +108,8 @@ void Player::Tick(float deltaTime)
             }
         }
 	}
-	if (Input::Get().GetKey(VK_DOWN))
+	//if (Input::Get().GetKey(VK_DOWN))
+    if(GetAsyncKeyState(keyMap.moveDown) & 0x8000)
 	{
         if (canPlayerMoveInterface->CanPlayerMove(Position(), Vector2(Position().x, Position().y + 1)))
         {
@@ -129,7 +128,8 @@ void Player::Tick(float deltaTime)
         }
 	}
 
-    if (Input::Get().GetKey(VK_SPACE))
+    //if (Input::Get().GetKey(VK_SPACE))
+    if (GetAsyncKeyState(keyMap.shift) & 0x8000)
     {
         if (elapsed.count() >= putBombCooldownSec)
         {

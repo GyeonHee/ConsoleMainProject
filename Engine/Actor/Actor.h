@@ -17,14 +17,21 @@ class Engine_API Actor : public RTTI
 	friend class Level;
 	RTTI_DECLARATIONS(Actor, RTTI)
 public:
-	/*Actor(const char* image = "",
-		Color color = Color::White,
-		const Vector2& position = Vector2::Zero
-	);*/
-    Actor(const wchar_t* image = L" ",
+    /*Actor(const char* image = "",
         Color color = Color::White,
         const Vector2& position = Vector2::Zero
-    );
+    );*/ // 아스키용(사용x)
+
+     /*Actor(const wchar_t* image = L" ",
+         Color color = Color::White,
+         const Vector2& position = Vector2::Zero
+     );*/ // 유니코드(기존)
+
+    Actor(const wchar_t* image = L" ",
+        Color bgcolor = Color::White,
+        Color fgColor = Color::White,
+        const Vector2& position = Vector2::Zero
+    ); // 유니코드(배경 전경 나눔)
 	virtual ~Actor();
 
 	// 이벤트 함수
@@ -62,8 +69,8 @@ public:
 
 	// 게임 종료 요청 함수
 	void QuitGame();
-
-    void SetColor(Color newColor);
+    
+    void SetColor(Color newBgColor);
 
 protected:
 	// 개체의 위치
@@ -77,7 +84,9 @@ protected:
 	int width = 0;
 
 	// 텍스트 색상 값
-	Color color;
+	//Color color;
+    Color bgColor;
+    Color fgColor;
 
 	// BeginPlay 호출이 되었는지 확인
 	bool hasBeganPlay = false;

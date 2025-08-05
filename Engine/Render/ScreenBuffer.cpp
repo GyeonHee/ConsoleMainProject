@@ -1,6 +1,7 @@
 #include "ScreenBuffer.h"
-#include <iostream>
 #include "Engine.h"
+
+#include <iostream>
 #include <vector>
 
 ScreenBuffer::ScreenBuffer(const Vector2& screenSize)

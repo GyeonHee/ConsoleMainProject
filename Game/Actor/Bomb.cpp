@@ -1,7 +1,7 @@
 ﻿#include "Bomb.h"
 #include "Level/GameLevel.h"
 
-Bomb::Bomb(const Vector2& position) : Actor(L"ɵ", Color::BrightCyan, position)
+Bomb::Bomb(const Vector2& position) : Actor(L"O", Color::White, Color::Blue, position)
 {
     // ɵÖöÓó
     SetSortingOrder(1);

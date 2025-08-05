@@ -5,9 +5,19 @@
 
 class Player : public Actor
 {
+public:
+    struct KeyMap
+    {
+        int moveUp;
+        int moveDown;
+        int moveLeft;
+        int moveRight;
+        int shift;
+    };
+
 	RTTI_DECLARATIONS(Player, Actor)
 public:
-    Player(const Vector2& position);
+    Player(const Vector2& position, const KeyMap& keys, Color color);
 
     virtual void BeginPlay() override;
 	virtual void Tick(float deltaTime) override;
@@ -28,4 +38,6 @@ private:
     float timeSinceHit = 0.0f;
 
     class ICanPlayerMove* canPlayerMoveInterface = nullptr;
+
+    KeyMap keyMap;
 };
