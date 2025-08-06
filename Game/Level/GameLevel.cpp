@@ -7,6 +7,10 @@
 #include "Actor/Box.h"
 #include "Actor/Bush.h"
 
+#include "Core/Input.h"
+#include "Engine.h"
+#include "Game/Game.h"
+
 GameLevel* GameLevel::instance = nullptr;
 
 Player::KeyMap player1Keys = { 'W', 'S', 'A', 'D', VK_LSHIFT };
@@ -32,6 +36,11 @@ void GameLevel::BeginPlay()
 void GameLevel::Tick(float deltaTime)
 {
 	super::Tick(deltaTime);
+
+    if (Input::Get().GetKeyDown(VK_ESCAPE))
+    {
+        static_cast<Game&>(Engine::Get()).ToggleMenu();
+    }
 }
 
 void GameLevel::Render()

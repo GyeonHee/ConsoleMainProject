@@ -52,13 +52,6 @@ void Player::Tick(float deltaTime)
 	sprintf_s(buffer, 20, "pos: (%d, %d)", position.x, position.y);
 	SetConsoleTitleA(buffer);
 
-	
-    // 입력 처리
-    if (Input::Get().GetKeyDown(VK_ESCAPE))
-    {
-        Engine::Get().Quit();
-    }
-
 	// 방향키 입력
 	auto now = std::chrono::steady_clock::now();
 	std::chrono::duration<double> elapsed = now - lastKeyPressTime;

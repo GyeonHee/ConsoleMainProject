@@ -224,6 +224,7 @@ void Engine::AddLevel(Level* newLevel)
 
 void Engine::CleanUp()
 {
+
 	// 레벨 삭제
 	SafeDelete(mainLevel);
 
@@ -233,6 +234,7 @@ void Engine::CleanUp()
 	// 렌더 타겟 삭제.
 	SafeDelete(renderTargets[0]);
 	SafeDelete(renderTargets[1]);
+
 }
 
 void Engine::Quit()

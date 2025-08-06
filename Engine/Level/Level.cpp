@@ -15,8 +15,20 @@ Level::~Level()
 		SafeDelete(actor);
 	}
 
+    for (Actor* actor : addRequestedActors)
+    {
+        SafeDelete(actor);
+    }
+
+    for (Actor* actor : destroyRequestedActors)
+    {
+        SafeDelete(actor);
+    }
+
 	// std::vector 정리
 	actors.clear();
+    addRequestedActors.clear();
+    destroyRequestedActors.clear();
 }
 
 // 레벨에 액터를 추가할 때 사용
