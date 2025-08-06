@@ -27,7 +27,6 @@ public:
     bool HandleExplosionAt(const Vector2& target, std::set<Vector2>& visited);
     std::vector<Actor*> FindActorsAt(const Vector2& pos);
     bool IsInMapBounds(const Vector2& pos);
-    //void RemoveActor(Actor* actor);
 
 private:
 	// 맵 파일을 읽어서 게임 객체 생성하는 함수
@@ -38,4 +37,12 @@ private:
     // 싱글톤 변수
     static GameLevel* instance;
 
+
+private:
+    void SetExplosionEffect(const std::set<Vector2>& tiles);
+    void ClearExplosionEffect();
+
+    std::set<Vector2> explosionTiles;
+    float explosionTimer = 0.0f;
+    bool isExplosionVisible = false;
 };

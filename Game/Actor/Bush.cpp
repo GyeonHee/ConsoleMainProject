@@ -1,6 +1,6 @@
-#include "Bush.h"
+ï»¿#include "Bush.h"
 
-Bush::Bush(const Vector2& position) : Actor(L"¡á", Color::Green, Color::BrightGreen, position)
+Bush::Bush(const Vector2& position) : Actor(L"â™’", Color::BrightGreen, Color::Green, position)
 {
     SetSortingOrder(4);
 }

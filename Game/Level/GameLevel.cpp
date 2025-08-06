@@ -41,6 +41,21 @@ void GameLevel::Tick(float deltaTime)
     {
         static_cast<Game&>(Engine::Get()).ToggleMenu();
     }
+
+
+
+
+
+    if (isExplosionVisible)
+    {
+        explosionTimer += deltaTime;
+        if (explosionTimer >= 0.4f)
+        {
+            ClearExplosionEffect();
+            explosionTiles.clear();
+            isExplosionVisible = false;
+        }
+    }
 }
 
 void GameLevel::Render()
@@ -337,15 +352,34 @@ void GameLevel::HandleBombExplosion(const Vector2& center)
 {
     std::set<Vector2> visited;
     InternalHandleBombExplosion(center, visited);
+
+    
+
+
+
+    // 폭발 범위 좌표 저장 및 효과 적용
+    explosionTiles = visited;
+    SetExplosionEffect(explosionTiles);
+
+    explosionTimer = 0.0f;
+    isExplosionVisible = true;
 }
 
 void GameLevel::InternalHandleBombExplosion(const Vector2& center, std::set<Vector2>& visited)
 {
-    if (visited.count(center)) return;  // 이미 처리한 위치면 return
-    visited.insert(center);
+    //if (visited.count(center)) return;  // 이미 처리한 위치면 return
+    //visited.insert(center);
+
+
+
+
+    if (HandleExplosionAt(center, visited)) return;
+
+
+
 
     // 폭탄 터지는 범위 설정 변수
-    const int explosionRange = 3;
+    const int explosionRange = 2;
 
     const Vector2 directions[] = {
         {1, 0}, {-1, 0}, {0, 1}, {0, -1}
@@ -369,6 +403,13 @@ void GameLevel::InternalHandleBombExplosion(const Vector2& center, std::set<Vect
 
 bool GameLevel::HandleExplosionAt(const Vector2& target, std::set<Vector2>& visited)
 {
+    if (visited.count(target)) return true; // 이미 처리된 위치면 종료 (true로 막음)
+
+    visited.insert(target);       // 방문 기록
+    explosionTiles.insert(target); // 폭발 범위 저장
+
+
+
     std::vector<Actor*> actorsAt = FindActorsAt(target);
 
     for (Actor* actor : actorsAt)
@@ -456,13 +497,33 @@ bool GameLevel::IsInMapBounds(const Vector2& pos)
         pos.y >= 0 && pos.y < 13);
 }
 
-//void GameLevel::RemoveActor(Actor* actor)
-//{
-//    auto it = std::find(actors.begin(), actors.end(), actor);
-//    
-//    if (it != actors.end())
-//    {
-//        delete* it;           // 메모리 해제
-//        actors.erase(it);     // 벡터에서 제거
-//    }
-//}
+
+
+
+
+
+
+
+void GameLevel::SetExplosionEffect(const std::set<Vector2>& tiles)
+{
+    for (Actor* actor : actors)
+    {
+        Ground* ground = actor->As<Ground>();
+        if (ground && tiles.count(ground->Position()) > 0)
+        {
+            ground->SetExploding(true);
+        }
+    }
+}
+
+void GameLevel::ClearExplosionEffect()
+{
+    for (Actor* actor : actors)
+    {
+        Ground* ground = actor->As<Ground>();
+        if (ground)
+        {
+            ground->SetExploding(false);
+        }
+    }
+}
