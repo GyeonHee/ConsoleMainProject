@@ -1,6 +1,6 @@
 #include "Vector2.h"
 #include <iostream>
-
+#include <tuple>
 // 전역 변수 초기화
 Vector2 Vector2::Zero = Vector2(0, 0);
 Vector2 Vector2::One = Vector2(1, 1);
@@ -45,6 +45,11 @@ Vector2 Vector2::operator-(const Vector2& other) const
 bool Vector2::operator==(const Vector2& other) const
 {
     return x == other.x && y == other.y;
+}
+
+bool Vector2::operator<(const Vector2& other) const
+{
+    return std::tie(x, y) < std::tie(other.x, other.y);
 }
 
 Vector2::operator COORD()

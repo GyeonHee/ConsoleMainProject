@@ -43,6 +43,8 @@ void Player::Tick(float deltaTime)
         if (ShouldBeRemoved())
         {
             Destroy();
+            // 여기서 게임 종료 이벤트 처리
+            Engine::Get().Quit();
         }
 
         return;

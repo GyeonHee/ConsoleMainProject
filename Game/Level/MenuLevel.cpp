@@ -1,22 +1,22 @@
-#include "MenuLevel.h"
+ï»¿#include "MenuLevel.h"
 #include "Game/Game.h"
 #include "Utils/Utils.h"
 #include "Input.h"
 
 MenuLevel::MenuLevel()
 {
-    // ¸Ş´º ¾ÆÀÌÅÛ Ãß°¡.
+    // ë©”ë‰´ ì•„ì´í…œ ì¶”ê°€.
     items.emplace_back(new MenuItem(
-        L"Resume Game",
+        L"â¯ï¸Resume Game",
         []() { static_cast<Game&>(Engine::Get()).ToggleMenu(); }
     ));
 
     items.emplace_back(new MenuItem(
-        L"Quit Game",
+        L"â Quit Game",
         []() { Engine::Get().Quit(); }
     ));
 
-    // ¾ÆÀÌÅÛ ¼ö ¹Ì¸® ÀúÀå.
+    // ì•„ì´í…œ ìˆ˜ ë¯¸ë¦¬ ì €ì¥.
     length = static_cast<int>(items.size());
 }
 
@@ -34,7 +34,7 @@ void MenuLevel::Tick(float deltaTime)
 {
     super::Tick(deltaTime);
 
-    // ÀÔ·Â Ã³¸®.
+    // ì…ë ¥ ì²˜ë¦¬.
     if (Input::Get().GetKeyDown(VK_UP))
     {
         currentIndex = (currentIndex - 1 + length) % length;
@@ -45,19 +45,19 @@ void MenuLevel::Tick(float deltaTime)
         currentIndex = (currentIndex + 1) % length;
     }
 
-    // Enter Å° ÀÔ·Â.
+    // Enter í‚¤ ì…ë ¥.
     if (Input::Get().GetKeyDown(VK_RETURN))
     {
-        // ¸Ş´º ¾ÆÀÌÅÛÀÌ ÀúÀåÇÏ°í ÀÖ´Â ÇÔ¼ö È£Ãâ.
+        // ë©”ë‰´ ì•„ì´í…œì´ ì €ì¥í•˜ê³  ìˆëŠ” í•¨ìˆ˜ í˜¸ì¶œ.
         items[currentIndex]->onSelected();
     }
 
     if (Input::Get().GetKeyDown(VK_ESCAPE))
     {
-        // Game¿¡ Åä±Û ¸Ş´º ±â´É Ãß°¡ÈÄ È£ÃâÇØ¾ß ÇÔ.
+        // Gameì— í† ê¸€ ë©”ë‰´ ê¸°ëŠ¥ ì¶”ê°€í›„ í˜¸ì¶œí•´ì•¼ í•¨.
         Engine::Get().Quit();
 
-        // ¸Ş´º ÀÎµ¦½º ÃÊ±âÈ­.
+        // ë©”ë‰´ ì¸ë±ìŠ¤ ì´ˆê¸°í™”.
         currentIndex = 0;
     }
 }
@@ -65,19 +65,28 @@ void MenuLevel::Tick(float deltaTime)
 void MenuLevel::Render()
 {
     super::Render();
+    // ì œëª© ì¶œë ¥
+    Engine::Get().WriteToBuffer(Vector2(1, 2), L"âœ¨ ğŸŠ    ğŸ‰âœ¨", Color::Black, Color::Yellow);
+    Engine::Get().WriteToBuffer(Vector2(1, 3), L"Crazy", Color::Black, Color::Red);
+    Engine::Get().WriteToBuffer(Vector2(6, 3), L"Arcade", Color::Black, Color::Blue);
+    Engine::Get().WriteToBuffer(Vector2(1, 4), L"ğŸ’£", Color::Black, Color::Blue);
+    Engine::Get().WriteToBuffer(Vector2(3, 4), L"ğŸ›¼", Color::Black, Color::Red);
+    Engine::Get().WriteToBuffer(Vector2(5, 4), L"ğŸ¥½", Color::Black, Color::BrightCyan);
+    Engine::Get().WriteToBuffer(Vector2(7, 4), L"ğŸ’¥", Color::Black, Color::BrightRed);
+    Engine::Get().WriteToBuffer(Vector2(9, 4), L"ğŸ’¦", Color::Black, Color::Cyan);
+    Engine::Get().WriteToBuffer(Vector2(11, 4), L"ğŸ•¶ï¸", Color::Black, Color::White);
 
-    Engine::Get().WriteToBuffer(Vector2(2, 3), L"Crazy Arcade", Color::Cyan, Color::Blue);
-    // ¸Ş´º ¾ÆÀÌÅÛ ·»´õ¸µ.
+    // ë©”ë‰´ ì•„ì´í…œ ë Œë”ë§.
     for (int ix = 0; ix < length; ++ix)
     {
-        // ¾ÆÀÌÅÛ »ö»ó È®ÀÎ.
+        // ì•„ì´í…œ ìƒ‰ìƒ í™•ì¸.
         Color textColor =
             (ix == currentIndex) ? selectedColor : unSelectedColor;
 
-        // »ö»ó ¼³Á¤.
+        // ìƒ‰ìƒ ì„¤ì •.
         Utils::SetConsoleTextColor(static_cast<WORD>(textColor));
 
-        // ¸Ş´º ÅØ½ºÆ® Ãâ·Â.
-        Engine::Get().WriteToBuffer(Vector2(2, ix + 5), items[ix]->menuText, Color::Black, textColor);
+        // ë©”ë‰´ í…ìŠ¤íŠ¸ ì¶œë ¥.
+        Engine::Get().WriteToBuffer(Vector2(1, ix + 8), items[ix]->menuText, Color::Black, textColor);
     }
 }

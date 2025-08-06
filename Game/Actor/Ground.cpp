@@ -1,7 +1,7 @@
-#include "Ground.h"
+ï»¿#include "Ground.h"
 
-Ground::Ground(const Vector2& position) : Actor(L"¡á", Color::White, Color::White, position)
+Ground::Ground(const Vector2& position) : Actor(L"â– ", Color::White, Color::White, position)
 {
-    // ±×¸± ¶§ »ç¿ëÇÒ Á¤·Ä ¼ø¼­ ¼³Á¤.
+    // ê·¸ë¦´ ë•Œ ì‚¬ìš©í•  ì •ë ¬ ìˆœì„œ ì„¤ì •.
     SetSortingOrder(0);
 }

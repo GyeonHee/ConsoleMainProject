@@ -47,7 +47,7 @@ private:
     int currentIndex = 0;
 
     // 아이템 선택 색상.
-    Color selectedColor = Color::Green;
+    Color selectedColor = Color::BrightCyan;
 
     // 아이템 선택 안됐을 때 색상.
     Color unSelectedColor = Color::White;

@@ -335,35 +335,107 @@ GameLevel& GameLevel::Get()
 
 void GameLevel::HandleBombExplosion(const Vector2& center)
 {
+    std::set<Vector2> visited;
+    InternalHandleBombExplosion(center, visited);
+}
+
+void GameLevel::InternalHandleBombExplosion(const Vector2& center, std::set<Vector2>& visited)
+{
+    if (visited.count(center)) return;  // 이미 처리한 위치면 return
+    visited.insert(center);
+
+    // 폭탄 터지는 범위 설정 변수
+    const int explosionRange = 3;
+
     const Vector2 directions[] = {
-       {0, 0}, {1, 0}, {-1, 0}, {0, 1}, {0, -1}
+        {1, 0}, {-1, 0}, {0, 1}, {0, -1}
     };
 
-    std::vector<Actor*> toDestroy; // 삭제할 액터 저장
-    
+    // 중심
+    HandleExplosionAt(center, visited);
+
     for (const Vector2& dir : directions)
     {
-        Vector2 target = center + dir;
-        if (!IsInMapBounds(target)) continue;
-
-        std::vector<Actor*> actorsAt = FindActorsAt(target);
-
-        for (Actor* actor : actorsAt)
+        for (int i = 1; i <= explosionRange; ++i)
         {
-            if (actor->As <Wall>()) continue;
+            Vector2 target = center + dir * i;
+            if (!IsInMapBounds(target)) break;
 
-            if (actor->As<Block>() || actor->As<Box>() || actor->As<Bomb>() || actor->As<Bush>())
-            {
-				actor->Destroy();
-            }
-
-            if (actor->As<Player>())
-            {
-                actor->As<Player>()->PlayerHitBomb();
-            }
+            bool stop = HandleExplosionAt(target, visited);
+            if (stop) break; // 막히면 종료
         }
     }
 }
+
+bool GameLevel::HandleExplosionAt(const Vector2& target, std::set<Vector2>& visited)
+{
+    std::vector<Actor*> actorsAt = FindActorsAt(target);
+
+    for (Actor* actor : actorsAt)
+    {
+        if (actor->As<Wall>())
+            return true;
+
+        if (actor->As<Bomb>())
+        {
+            actor->Destroy();
+            InternalHandleBombExplosion(target, visited); // 💥 연쇄폭발 (visited로 무한 방지)
+            return false;
+        }
+
+        if (actor->As<Block>() || actor->As<Box>() || actor->As<Bush>())
+        {
+            actor->Destroy();
+            return true;
+        }
+
+        if (actor->As<Player>())
+        {
+            actor->As<Player>()->PlayerHitBomb();
+        }
+    }
+
+    return false;
+}
+
+// 기존 HandleBombExplosion 함수
+
+//void GameLevel::HandleBombExplosion(const Vector2& center)
+//{
+//
+//    const Vector2 directions[] = {
+//       {1, 0}, {-1, 0}, {0, 1}, {0, -1}, {0, 0}
+//    };
+//    
+//    for (const Vector2& dir : directions)
+//    {
+//        // '+' 범위 안에 있는 타겟
+//        Vector2 target = center + dir;
+//        if (!IsInMapBounds(target)) continue;
+//
+//        // 타겟이 된 액터
+//        std::vector<Actor*> actorsAt = FindActorsAt(target);
+//
+//        // 타겟 액터 순회
+//        for (Actor* actor : actorsAt)
+//        {
+//            // 벽이면 제외
+//            if (actor->As <Wall>()) continue;
+//
+//            if (actor->As<Block>() || actor->As<Box>() || actor->As<Bush>() || actor->As<Bomb>())
+//            {
+//                actor->Destroy();
+//                //Bomb::Destroy();
+//            }
+//
+//            // 플레이어면 피격 함수 처리
+//            if (actor->As<Player>())
+//            {
+//                actor->As<Player>()->PlayerHitBomb();
+//            }
+//        }
+//    }
+//}
 
 std::vector<Actor*> GameLevel::FindActorsAt(const Vector2& pos)
 {
@@ -384,13 +456,13 @@ bool GameLevel::IsInMapBounds(const Vector2& pos)
         pos.y >= 0 && pos.y < 13);
 }
 
-void GameLevel::RemoveActor(Actor* actor)
-{
-    auto it = std::find(actors.begin(), actors.end(), actor);
-    
-    if (it != actors.end())
-    {
-        delete* it;           // 메모리 해제
-        actors.erase(it);     // 벡터에서 제거
-    }
-}
+//void GameLevel::RemoveActor(Actor* actor)
+//{
+//    auto it = std::find(actors.begin(), actors.end(), actor);
+//    
+//    if (it != actors.end())
+//    {
+//        delete* it;           // 메모리 해제
+//        actors.erase(it);     // 벡터에서 제거
+//    }
+//}

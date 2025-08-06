@@ -2,8 +2,8 @@
 
 #include "Level/Level.h"
 #include "Interface/ICanPlayerMove.h"
+#include <set>
 
-class Player;
 class GameLevel : public Level, public ICanPlayerMove
 {
 	RTTI_DECLARATIONS(GameLevel, Level)
@@ -23,18 +23,19 @@ public:
 
     static GameLevel& Get();
     void HandleBombExplosion(const Vector2& center);
+    void InternalHandleBombExplosion(const Vector2& center, std::set<Vector2>& visited);
+    bool HandleExplosionAt(const Vector2& target, std::set<Vector2>& visited);
     std::vector<Actor*> FindActorsAt(const Vector2& pos);
     bool IsInMapBounds(const Vector2& pos);
-    void RemoveActor(Actor* actor);
+    //void RemoveActor(Actor* actor);
 
 private:
 	// 맵 파일을 읽어서 게임 객체 생성하는 함수
 	void ReadMapFile(const char* fileName);
 private:
-    Player* player; // 또는 스마트 포인터인 std::unique_ptr<Player>
-
 	int playerWidth = 0;
 
     // 싱글톤 변수
     static GameLevel* instance;
+
 };

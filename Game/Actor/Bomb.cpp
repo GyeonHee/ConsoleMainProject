@@ -28,10 +28,13 @@ void Bomb::Tick(float deltaTime)
 void Bomb::Explode()
 {
     // GameLevel이 싱글턴이라면 예: GameLevel::Instance()->HandleBombExplosion(...)
-    GameLevel* level = &GameLevel::Get();  // 정적 접근자 또는 외부 주입 방식
-    if (level != nullptr)
-    {
-        level->HandleBombExplosion(Position());
-        //owner->DestroyActor(this); //HandleBombExplosion(Position())여기서 삭제함 여기서 하면 역참조 에러남
-    }
+    //GameLevel* level = &GameLevel::Get();  // 정적 접근자 또는 외부 주입 방식
+    //if (level != nullptr)
+    //{
+    //    level->HandleBombExplosion(Position());
+    //    //owner->DestroyActor(this); //HandleBombExplosion(Position())여기서 삭제함 여기서 하면 역참조 에러남
+    //}
+
+    GameLevel::Get().HandleBombExplosion(Position());
+
 }
