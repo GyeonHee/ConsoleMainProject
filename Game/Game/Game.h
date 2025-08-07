@@ -14,6 +14,10 @@ public:
 
     virtual void CleanUp() override;
 
+    static Game& Get();
+
+    void ReStart();
+
 private:
 
     // 메뉴 레벨.
@@ -24,4 +28,6 @@ private:
 
     // 현재 메뉴 레벨을 보여주고 있는지를 나타냄.
     bool showMenu = true;
+
+    static Game* instance;
 };

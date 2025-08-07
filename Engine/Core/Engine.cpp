@@ -144,7 +144,7 @@ void Engine::Run()
 	Utils::SetConsoleTextColor(FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED);
 }
 
-// 기존 WriteToBuffer
+// 기존 char타입 WriteToBuffer
 
 //void Engine::WriteToBuffer(const Vector2& position, const wchar_t* image, Color color)
 //{
@@ -176,33 +176,89 @@ void Engine::Run()
 //    }
 //}
 
+// surrogate pair 검사 (UTF-16) 안쓴 버전 WriteToBuffer
+
+void Engine::WriteToBuffer(const Vector2& position, const wchar_t* image, Color bgColor, Color fgColor)
+{
+    // 문자열 길이.
+   //int length = static_cast<int>(strlen(image));
+    int length = static_cast<int>(wcslen(image));
+
+    // 문자열 기록.
+    for (int ix = 0; ix < length; ++ix)
+    {
+        int x = position.x + ix;
+        int y = position.y;
+
+        // 버퍼 범위를 초과하지 않도록 체크
+        if (x < 0 || x >= settings.width || y < 0 || y >= settings.height)
+            continue;
+
+        // 기록할 문자 위치.
+        int index = (position.y * (settings.width)) + position.x + ix;
+        //              배경                      |              전경
+        WORD attr = static_cast<WORD>(bgColor) << 4 | static_cast<WORD>(fgColor);
+
+
+        // 버퍼에 문자/색상 기록.
+        imageBuffer[index].Char.UnicodeChar = image[ix];
+        //imageBuffer[index].Attributes = (WORD)color;
+        imageBuffer[index].Attributes = attr;
+
+    }
+}
+
+// surrogate pair 검사 (UTF-16) 쓴 버전 WriteToBuffer
+
 //void Engine::WriteToBuffer(const Vector2& position, const wchar_t* image, Color bgColor, Color fgColor)
 //{
-//    // 문자열 길이.
-//   //int length = static_cast<int>(strlen(image));
 //    int length = static_cast<int>(wcslen(image));
 //
-//    // 문자열 기록.
-//    for (int ix = 0; ix < length; ++ix)
+//    int x = position.x;
+//    int y = position.y;
+//
+//    for (int ix = 0; ix < length;)
 //    {
-//        int x = position.x + ix;
-//        int y = position.y;
+//        wchar_t ch = image[ix];
 //
-//        // 버퍼 범위를 초과하지 않도록 체크
+//        wchar_t displayChar = ch;
+//        bool isSurrogatePair = false;
+//
+//        // surrogate pair 검사 (UTF-16)
+//        if (ix + 1 < length &&
+//            (ch >= 0xD800 && ch <= 0xDBFF) &&             // high surrogate
+//            (image[ix + 1] >= 0xDC00 && image[ix + 1] <= 0xDFFF)) // low surrogate
+//        {
+//            isSurrogatePair = true;
+//            displayChar = ch; // 일단 high surrogate 저장 (표현 제한 있음)
+//        }
+//
+//        // 범위 체크
 //        if (x < 0 || x >= settings.width || y < 0 || y >= settings.height)
+//        {
+//            ix += isSurrogatePair ? 2 : 1;
+//            x += isSurrogatePair ? 2 : 1;
 //            continue;
+//        }
 //
-//        // 기록할 문자 위치.
-//        int index = (position.y * (settings.width)) + position.x + ix;
-//        //              배경                      |              전경
+//        int index = (y * settings.width) + x;
 //        WORD attr = static_cast<WORD>(bgColor) << 4 | static_cast<WORD>(fgColor);
 //
-//
-//        // 버퍼에 문자/색상 기록.
-//        imageBuffer[index].Char.UnicodeChar = image[ix];
-//        //imageBuffer[index].Attributes = (WORD)color;
+//        imageBuffer[index].Char.UnicodeChar = displayChar;  // 여기서 high surrogate만 넣는 건 제한적
 //        imageBuffer[index].Attributes = attr;
 //
+//        if (isSurrogatePair)
+//        {
+//            // 다음 칸도 채움 (low surrogate를 넣어야 되지만 WriteConsoleOutputW는 한 칸씩 처리라 좀 제한적)
+//            if (x + 1 < settings.width)
+//            {
+//                imageBuffer[index + 1].Char.UnicodeChar = image[ix + 1];
+//                imageBuffer[index + 1].Attributes = attr;
+//            }
+//        }
+//
+//        ix += isSurrogatePair ? 2 : 1;
+//        x += isSurrogatePair ? 2 : 1;  // 이모지는 2칸 차지
 //    }
 //}
 
@@ -501,58 +557,5 @@ void Engine::ConsoleFontSizeSetting(HANDLE hConsole, int width, int height)
 
     if (!SetCurrentConsoleFontEx(hConsole, FALSE, &fontInfo)) {
         std::cerr << "폰트 설정 실패\n";
-    }
-}
-
-// ==================================================================================================================
-void Engine::WriteToBuffer(const Vector2& position, const wchar_t* image, Color bgColor, Color fgColor)
-{
-    int length = static_cast<int>(wcslen(image));
-
-    int x = position.x;
-    int y = position.y;
-
-    for (int ix = 0; ix < length;)
-    {
-        wchar_t ch = image[ix];
-
-        wchar_t displayChar = ch;
-        bool isSurrogatePair = false;
-
-        // surrogate pair 검사 (UTF-16)
-        if (ix + 1 < length &&
-            (ch >= 0xD800 && ch <= 0xDBFF) &&             // high surrogate
-            (image[ix + 1] >= 0xDC00 && image[ix + 1] <= 0xDFFF)) // low surrogate
-        {
-            isSurrogatePair = true;
-            displayChar = ch; // 일단 high surrogate 저장 (표현 제한 있음)
-        }
-
-        // 범위 체크
-        if (x < 0 || x >= settings.width || y < 0 || y >= settings.height)
-        {
-            ix += isSurrogatePair ? 2 : 1;
-            x += isSurrogatePair ? 2 : 1;
-            continue;
-        }
-
-        int index = (y * settings.width) + x;
-        WORD attr = static_cast<WORD>(bgColor) << 4 | static_cast<WORD>(fgColor);
-
-        imageBuffer[index].Char.UnicodeChar = displayChar;  // 여기서 high surrogate만 넣는 건 제한적
-        imageBuffer[index].Attributes = attr;
-
-        if (isSurrogatePair)
-        {
-            // 다음 칸도 채움 (low surrogate를 넣어야 되지만 WriteConsoleOutputW는 한 칸씩 처리라 좀 제한적)
-            if (x + 1 < settings.width)
-            {
-                imageBuffer[index + 1].Char.UnicodeChar = image[ix + 1];
-                imageBuffer[index + 1].Attributes = attr;
-            }
-        }
-
-        ix += isSurrogatePair ? 2 : 1;
-        x += isSurrogatePair ? 2 : 1;  // 이모지는 2칸 차지
     }
 }

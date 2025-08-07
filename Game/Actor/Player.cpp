@@ -34,6 +34,7 @@ void Player::BeginPlay()
 void Player::Tick(float deltaTime)
 {
 	super::Tick(deltaTime);
+  
 
     // 피격시 isHit True가 되며 deltaTime이 흘러감
     if (isHit)
@@ -42,11 +43,13 @@ void Player::Tick(float deltaTime)
 
         if (ShouldBeRemoved())
         {
-            Destroy();
+            //Destroy();
             // 여기서 게임 종료 이벤트 처리
+            //static_cast<Game&>(Engine::Get()).ReStart();
             Engine::Get().Quit();
         }
 
+        //isHit = false;
         return;
     }
 
@@ -131,8 +134,7 @@ void Player::Tick(float deltaTime)
         }
 	}
 
-    //if (Input::Get().GetKey(VK_SPACE))
-    if (GetAsyncKeyState(keyMap.shift) & 0x8000)
+    if (GetAsyncKeyState(keyMap.putBomb) & 0x8000)
     {
         if (elapsed.count() >= putBombCooldownSec)
         {
@@ -146,8 +148,9 @@ void Player::Tick(float deltaTime)
 // 폭탄에 피격 했을시 5초가 지나면 Destroy
 bool Player::ShouldBeRemoved() const
 {
-    return isHit && timeSinceHit >= 5.0f;
+    return isHit && timeSinceHit >= 2.0f;
 }
+
 
 void Player::ChangeImage(const wchar_t* newImage)
 {

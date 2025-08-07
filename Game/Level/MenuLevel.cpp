@@ -2,6 +2,7 @@
 #include "Game/Game.h"
 #include "Utils/Utils.h"
 #include "Input.h"
+#include "Actor/Player.h"
 
 MenuLevel::MenuLevel()
 {

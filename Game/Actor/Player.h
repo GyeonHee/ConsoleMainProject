@@ -12,10 +12,10 @@ public:
         int moveDown;
         int moveLeft;
         int moveRight;
-        int shift;
+        int putBomb;
 
-        KeyMap(int up, int down, int left, int right, int shiftKey)
-            : moveUp(up), moveDown(down), moveLeft(left), moveRight(right), shift(shiftKey) {
+        KeyMap(int up, int down, int left, int right, int putBombKey)
+            : moveUp(up), moveDown(down), moveLeft(left), moveRight(right), putBomb(putBombKey) {
         }
     };
 
@@ -32,7 +32,6 @@ public:
     void PlayerHitBomb();
     bool ShouldBeRemoved() const;
 
-
 private:
 	std::chrono::steady_clock::time_point lastKeyPressTime = std::chrono::steady_clock::now();
 	const double moveCooldownSec = 0.2f;  // ÄðÅ¸ÀÓ
@@ -40,7 +39,7 @@ private:
 
     bool isHit = false;
     float timeSinceHit = 0.0f;
-
+    
     class ICanPlayerMove* canPlayerMoveInterface = nullptr;
 
     KeyMap keyMap;

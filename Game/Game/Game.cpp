@@ -2,7 +2,7 @@
 #include "Level/GameLevel.h"
 #include "Level/MenuLevel.h"
 
-//Game* Game::instance = nullptr;
+Game* Game::instance = nullptr;
 
 Game::Game()
 {
@@ -63,7 +63,15 @@ void Game::CleanUp()
     Engine::CleanUp();
 }
 
-//Game& Game::Get()
-//{
-//    return *instance;
-//}
+Game& Game::Get()
+{
+    return *instance;
+}
+
+void Game::ReStart()
+{
+    showMenu = true;
+    mainLevel = menuLevel;
+    SafeDelete(backLevel);
+    backLevel = new GameLevel();
+}

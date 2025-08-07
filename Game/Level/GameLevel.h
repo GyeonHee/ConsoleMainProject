@@ -38,6 +38,7 @@ private:
     static GameLevel* instance;
 
 
+// ==============================================================
 private:
     void SetExplosionEffect(const std::set<Vector2>& tiles);
     void ClearExplosionEffect();

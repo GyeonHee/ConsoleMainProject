@@ -13,8 +13,8 @@
 
 GameLevel* GameLevel::instance = nullptr;
 
-Player::KeyMap player1Keys = { 'W', 'S', 'A', 'D', VK_LSHIFT };
-Player::KeyMap player2Keys = { VK_UP, VK_DOWN, VK_LEFT, VK_RIGHT, VK_RSHIFT };
+Player::KeyMap player1Keys = { 'W', 'S', 'A', 'D', VK_LSHIFT};
+Player::KeyMap player2Keys = { 'I', 'K', 'J', 'L', VK_RSHIFT};
 
 GameLevel::GameLevel()
 {
@@ -25,31 +25,29 @@ GameLevel::GameLevel()
 
 GameLevel::~GameLevel()
 {
-    
+
 }
 
 void GameLevel::BeginPlay()
 {
-	super::BeginPlay();
+    super::BeginPlay();
 }
 
 void GameLevel::Tick(float deltaTime)
 {
-	super::Tick(deltaTime);
+    super::Tick(deltaTime);
 
     if (Input::Get().GetKeyDown(VK_ESCAPE))
     {
         static_cast<Game&>(Engine::Get()).ToggleMenu();
     }
 
-
-
-
+    // =========================================================
 
     if (isExplosionVisible)
     {
         explosionTimer += deltaTime;
-        if (explosionTimer >= 0.4f)
+        if (explosionTimer >= 0.2f)
         {
             ClearExplosionEffect();
             explosionTiles.clear();
@@ -60,72 +58,72 @@ void GameLevel::Tick(float deltaTime)
 
 void GameLevel::Render()
 {
-	super::Render();
+    super::Render();
 }
 
 void GameLevel::ReadMapFile(const char* fileName)
 {
-	// 최종 에셋 경로 완성
-	char filepath[256] = {};
-	sprintf_s(filepath, 256, "../Assets/%s", fileName);
+    // 최종 에셋 경로 완성
+    char filepath[256] = {};
+    sprintf_s(filepath, 256, "../Assets/%s", fileName);
 
-	FILE* file = nullptr;
-	fopen_s(&file, filepath, "rt");
+    FILE* file = nullptr;
+    fopen_s(&file, filepath, "rt");
 
-	// 예외처리
-	if (file == nullptr)
-	{
-		//std::cout << "맵 파일 읽기 실패: " << filename << "\n";
-		__debugbreak();
-		return;
-	}
+    // 예외처리
+    if (file == nullptr)
+    {
+        //std::cout << "맵 파일 읽기 실패: " << filename << "\n";
+        __debugbreak();
+        return;
+    }
 
-	// 파싱(Parcing, 해석)
-	fseek(file, 0, SEEK_END);
-	size_t fileSize = ftell(file);
-	rewind(file);
+    // 파싱(Parcing, 해석)
+    fseek(file, 0, SEEK_END);
+    size_t fileSize = ftell(file);
+    rewind(file);
 
-	// 확인한 파일 크기를 활용해 버퍼 할당
-	char* buffer = new char[fileSize + 1];
-	//buffer[fileSize] = '\0';
-	memset(buffer, 0, fileSize + 1);
-	size_t readSize = fread(buffer, sizeof(char), fileSize, file);
+    // 확인한 파일 크기를 활용해 버퍼 할당
+    char* buffer = new char[fileSize + 1];
+    //buffer[fileSize] = '\0';
+    memset(buffer, 0, fileSize + 1);
+    size_t readSize = fread(buffer, sizeof(char), fileSize, file);
 
-	/*if (fileSize != readSize)
-	{
-		std::cout << "fileSize is not matched with readSize\n";
-	}*/
+    /*if (fileSize != readSize)
+        {
+            std::cout << "fileSize is not matched with readSize\n";
+        }*/
 
-	// 배열 순회를 위한 인덱스 변수
-	int index = 0;
+        // 배열 순회를 위한 인덱스 변수
+    int index = 0;
 
-	// 문자열 길이 값
-	int size = (int)readSize;
+    // 문자열 길이 값
+    int size = (int)readSize;
 
-	// x, y 좌표
-	Vector2 position;
+    // x, y 좌표
+    Vector2 position;
 
-	// 문자 배열 순회
-	while (index < size)
-	{
-		// 맵 문자 확인
-		char mapCharacter = buffer[index];
-		index++;
+    // 문자 배열 순회
+    while (index < size)
+    {
+        // 맵 문자 확인
+        char mapCharacter = buffer[index];
+        index++;
 
-		// 개행 문자 처리
-		if (mapCharacter == '\n')
-		{
-			// 다음 줄로 넘기면서, x 좌표 초기화
-			++position.y;
-			position.x = 0;
+        // 개행 문자 처리
+        if (mapCharacter == '\n')
+        {
+            // 다음 줄로 넘기면서, x 좌표 초기화
+            ++position.y;
+            position.x = 0;
 
-			continue;
-		}
+            continue;
+        }
 
-		// 각 문자별로 처리
-         // 0 : Ground, 1 : Wall, 2 : Block, 3 : Box, 4 : Bush 
-		switch (mapCharacter)
-		{
+        // 각 문자별로 처리
+        // 0 : Ground, 1 : Wall, 2 : Block, 3 : Box, 4 : Bush 
+        switch (mapCharacter)
+        {
         case 'a':
             AddActor(new Player(position, player1Keys, Color::Red));
             AddActor(new Ground(position));
@@ -152,17 +150,17 @@ void GameLevel::ReadMapFile(const char* fileName)
             AddActor(new Bush(position));
             AddActor(new Ground(position));
             break;
-		}
+        }
 
-		// x 좌표 증가 처리
-		++position.x;
-	}
+        // x 좌표 증가 처리
+        ++position.x;
+    }
 
-	// 버퍼 해제
-	delete[] buffer;
+    // 버퍼 해제
+    delete[] buffer;
 
-	// 파일 닫기
-	fclose(file);
+    // 파일 닫기
+    fclose(file);
 }
 
 // 기존에 썼던 CanPlayerMove함수
@@ -292,7 +290,7 @@ bool GameLevel::CanPlayerMove(const Vector2& playerPosition, const Vector2& newP
 
             // 그 액터가 벽이거나, 블럭이거나, 물풍선이면
             if (actor->As<Wall>() || actor->As<Block>() || actor->As<Bomb>())
-            //if (actor->As<Wall>() || actor->As<Bomb>()) // 디버깅용
+                //if (actor->As<Wall>() || actor->As<Bomb>()) // 디버깅용
                 return false;
         }
     }
@@ -317,7 +315,7 @@ bool GameLevel::CanPlayerMove(const Vector2& playerPosition, const Vector2& newP
             {
                 // 그게 벽이거나 블럭,폭탄, 박스라면
                 if (actor->As<Wall>() || actor->As<Block>() || actor->As<Bomb>() || actor->As<Box>())
-                //if (actor->As<Wall>() || actor->As<Bomb>() || actor->As<Box>()) // 디버깅용
+                    //if (actor->As<Wall>() || actor->As<Bomb>() || actor->As<Box>()) // 디버깅용
                     // 못움직임
                     return false;
             }
@@ -351,14 +349,14 @@ GameLevel& GameLevel::Get()
 void GameLevel::HandleBombExplosion(const Vector2& center)
 {
     std::set<Vector2> visited;
+
+
     InternalHandleBombExplosion(center, visited);
 
-    
-
-
+    // =================================================
 
     // 폭발 범위 좌표 저장 및 효과 적용
-    explosionTiles = visited;
+    explosionTiles = visited; // 얘가 있어야 범위 시각화가 됨
     SetExplosionEffect(explosionTiles);
 
     explosionTimer = 0.0f;
@@ -367,34 +365,22 @@ void GameLevel::HandleBombExplosion(const Vector2& center)
 
 void GameLevel::InternalHandleBombExplosion(const Vector2& center, std::set<Vector2>& visited)
 {
-    //if (visited.count(center)) return;  // 이미 처리한 위치면 return
-    //visited.insert(center);
-
-
-
-
-    if (HandleExplosionAt(center, visited)) return;
-
-
-
-
     // 폭탄 터지는 범위 설정 변수
     const int explosionRange = 2;
 
     const Vector2 directions[] = {
-        {1, 0}, {-1, 0}, {0, 1}, {0, -1}
+        {0,0},
+        { 1, 0 }, {-1, 0}, {0, 1}, {0, -1}
     };
 
-    // 중심
-    HandleExplosionAt(center, visited);
 
     for (const Vector2& dir : directions)
     {
         for (int i = 1; i <= explosionRange; ++i)
         {
             Vector2 target = center + dir * i;
-            if (!IsInMapBounds(target)) break;
-
+            if (!IsInMapBounds(target)) break;           
+            
             bool stop = HandleExplosionAt(target, visited);
             if (stop) break; // 막히면 종료
         }
@@ -403,31 +389,49 @@ void GameLevel::InternalHandleBombExplosion(const Vector2& center, std::set<Vect
 
 bool GameLevel::HandleExplosionAt(const Vector2& target, std::set<Vector2>& visited)
 {
-    if (visited.count(target)) return true; // 이미 처리된 위치면 종료 (true로 막음)
 
-    visited.insert(target);       // 방문 기록
-    explosionTiles.insert(target); // 폭발 범위 저장
-
-
-
+    // 최종 해결본 ( if (visited.count(target)) return true 하면 연쇄폭발이 안되고, return false 하면 연쇄폭발은 되지만 벽을 뚫고 뒤에 있는 블럭까지 제거하는 문제가 생김)
+    // 절차 순서를 바꿔줘서 해결했음
+    
     std::vector<Actor*> actorsAt = FindActorsAt(target);
 
+    // 1. 💣 폭탄은 visited 검사 전에 우선 처리 (연쇄폭발 필수)
+    for (Actor* actor : actorsAt)
+    {
+        if (auto bomb = actor->As<Bomb>())
+        {
+            if (!visited.count(target))
+            {
+                visited.insert(target);            // ✅ 중복 방지
+                bomb->Destroy();
+                InternalHandleBombExplosion(target, visited);
+            }
+            //break;
+            return false; // 폭발은 이 방향으로 계속 퍼져야 함
+        }
+    }
+
+    // 2. 🔁 이제 visited 검사 (폭탄 아닌 것들)
+    if (visited.count(target))
+        return true;
+
+    // 3. Wall 처리 (벽이면 못 지나감)
     for (Actor* actor : actorsAt)
     {
         if (actor->As<Wall>())
-            return true;
+            return true; // 벽이면 폭발 멈춤
+    }
 
-        if (actor->As<Bomb>())
-        {
-            actor->Destroy();
-            InternalHandleBombExplosion(target, visited); // 💥 연쇄폭발 (visited로 무한 방지)
-            return false;
-        }
+    visited.insert(target);
+    explosionTiles.insert(target); // 폭발 범위에 추가
 
+    // 4. 파괴 가능한 오브젝트
+    for (Actor* actor : actorsAt)
+    {
         if (actor->As<Block>() || actor->As<Box>() || actor->As<Bush>())
         {
             actor->Destroy();
-            return true;
+            return true; // 폭발 여기서 멈춤
         }
 
         if (actor->As<Player>())
@@ -436,7 +440,7 @@ bool GameLevel::HandleExplosionAt(const Vector2& target, std::set<Vector2>& visi
         }
     }
 
-    return false;
+    return false; // 계속 퍼짐
 }
 
 // 기존 HandleBombExplosion 함수
@@ -483,10 +487,17 @@ std::vector<Actor*> GameLevel::FindActorsAt(const Vector2& pos)
     std::vector<Actor*> result;
 
     for (Actor* actor : actors)
-    {
+    {  
+        /*if (actor->Position() == pos && actor->As<Player>())
+            result.push_back(actor);*/
+
         if (actor->Position() == pos)
+        {
             result.push_back(actor);
+        }
     }
+
+   
 
     return result;
 }
@@ -498,10 +509,7 @@ bool GameLevel::IsInMapBounds(const Vector2& pos)
 }
 
 
-
-
-
-
+// ============================================================
 
 
 void GameLevel::SetExplosionEffect(const std::set<Vector2>& tiles)

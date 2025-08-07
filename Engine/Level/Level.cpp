@@ -66,6 +66,10 @@ void Level::BeginPlay()
 {
 	for (Actor* const actor : actors)
 	{
+        if (actor == nullptr)
+        {
+            continue; // nullptr 체크
+        }
 		// 액터 처리 여부 확인
 		if (!actor->isActive || actor->isExpired)
 		{
@@ -87,6 +91,10 @@ void Level::Tick(float deltaTime)
 {
 	for (Actor* const actor : actors)
 	{
+        if (actor == nullptr)
+        {
+            continue; // nullptr 체크
+        }
 		// 액터 처리 여부 확인
 		if (!actor->isActive || actor->isExpired)
 		{

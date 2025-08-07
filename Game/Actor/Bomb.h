@@ -15,6 +15,6 @@ public:
 
 private:
     std::chrono::steady_clock::time_point lastKeyPressTime = std::chrono::steady_clock::now();
-    const double bombCooldownSec = 2.0f;  // 2.5ÃÊ ÄğÅ¸ÀÓ
+    const double bombCooldownSec = 2.0f;  // 2.0ÃÊ ÄğÅ¸ÀÓ
 
 };
